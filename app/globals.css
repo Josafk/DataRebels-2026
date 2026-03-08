@@ -1,0 +1,252 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* shadcn/ui compat */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 222.2 84% 4.9%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+  }
+  /* html transparent para que NeuralBackground (z-0) sea el único fondo visible */
+  html {
+    background: transparent;
+    scroll-behavior: smooth;
+  }
+  body {
+    font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+    background: transparent;
+  }
+  /* Títulos usan Ambit */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-ambit), ui-sans-serif, system-ui, sans-serif;
+  }
+}
+
+/* Background responsivo Hero→MTP:
+   - Móvil (<640px): mobile-background.png
+   - sm+ (640px+): Background-Principal.png — cover + center, sin espacios negros */
+.hero-section-bg {
+  background-image: url('/mobile-background.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+@media (min-width: 640px) {
+  .hero-section-bg {
+    background-image: url('/Background-Principal.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+}
+
+/* Perfiles Hero: hover via Tailwind (group-hover + hover:!) en el componente */
+
+/* Outline CTA homologado - stroke #EA366B, texto blanco Inter Semibold 16px/24px */
+.outline-cta {
+  border: 2px solid #EA366B !important;
+  color: #fff !important;
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  line-height: 24px !important;
+}
+
+/* Liquid Glass - botones sin relleno (Our programs, Explore our programs, etc.) */
+.liquid-glass-btn {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.liquid-glass-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+.liquid-glass-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    0 0 6px rgba(0,0,0,0.03),
+    0 2px 6px rgba(0,0,0,0.08),
+    inset 3px 3px 0.5px -3px rgba(0,0,0,0.3),
+    inset -3px -3px 0.5px -3px rgba(0,0,0,0.25),
+    inset 1px 1px 1px -0.5px rgba(0,0,0,0.15),
+    inset -1px -1px 1px -0.5px rgba(0,0,0,0.15),
+    inset 0 0 6px 6px rgba(0,0,0,0.06),
+    inset 0 0 2px 2px rgba(0,0,0,0.03),
+    0 0 12px rgba(255,255,255,0.12);
+  transition: box-shadow 0.3s ease;
+}
+.liquid-glass-btn:hover:not(:disabled)::before {
+  box-shadow:
+    0 0 8px rgba(0,0,0,0.04),
+    0 4px 8px rgba(0,0,0,0.1),
+    inset 3px 3px 0.5px -3px rgba(0,0,0,0.25),
+    inset -3px -3px 0.5px -3px rgba(0,0,0,0.2),
+    inset 1px 1px 1px -0.5px rgba(255,255,255,0.08),
+    inset -1px -1px 1px -0.5px rgba(255,255,255,0.06),
+    inset 0 0 8px 8px rgba(255,255,255,0.08),
+    inset 0 0 3px 3px rgba(255,255,255,0.04),
+    0 0 16px rgba(255,255,255,0.18);
+}
+
+/* Beyond Data - Podcast cards thumbnail */
+.podcast-thumb {
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #1e3a8a 100%);
+}
+.podcast-thumb-pattern {
+  background-image: url("/Background podcast.png");
+  background-size: 120% 120%;
+  background-position: center;
+  opacity: 0.15;
+  mix-blend-mode: overlay;
+}
+
+/* Beyond Data Isologo - animación ondas de frecuencia */
+@keyframes beyond-data-wave {
+  0%, 100% { transform: scaleY(0.85); }
+  25% { transform: scaleY(1.15); }
+  50% { transform: scaleY(0.9); }
+  75% { transform: scaleY(1.1); }
+}
+.beyond-data-bar {
+  transform-origin: center 85%;
+  animation: beyond-data-wave 3s ease-in-out infinite;
+}
+.beyond-data-bar:nth-child(2) { animation-delay: 0s; }
+.beyond-data-bar:nth-child(3) { animation-delay: 0.4s; }
+.beyond-data-bar:nth-child(4) { animation-delay: 0.8s; }
+.beyond-data-bar:nth-child(5) { animation-delay: 1.2s; }
+
+/* Ocultar scrollbar manteniendo scroll horizontal */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Contact Section - Estilos para formulario HubSpot inyectado */
+#hubspot-contact-form.hubspot-contact-form-styled .hs-form,
+#hubspot-contact-form .hs-form {
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+#hubspot-contact-form .hs-form .hs-form-field {
+  margin-bottom: 1.25rem;
+}
+#hubspot-contact-form .hs-form label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #334155;
+  margin-bottom: 0.5rem;
+}
+#hubspot-contact-form .hs-form .hs-input,
+#hubspot-contact-form .hs-form input[type="text"],
+#hubspot-contact-form .hs-form input[type="email"],
+#hubspot-contact-form .hs-form textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0.9375rem;
+  color: #1e293b;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+#hubspot-contact-form .hs-form .hs-input:focus,
+#hubspot-contact-form .hs-form input:focus,
+#hubspot-contact-form .hs-form textarea:focus {
+  outline: none;
+  border-color: #1330F4;
+  box-shadow: 0 0 0 3px rgba(19, 48, 244, 0.1);
+}
+#hubspot-contact-form .hs-form textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+#hubspot-contact-form .hs-form .hs-error-msgs {
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  color: #dc2626;
+}
+#hubspot-contact-form .hs-form .hs-form-field.hubspot-required label::after {
+  content: " *";
+  color: #e11d48;
+}
+#hubspot-contact-form .hs-form .inputs-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+#hubspot-contact-form .hs-form .inputs-list li {
+  margin-bottom: 0.5rem;
+}
+#hubspot-contact-form .hs-form .hs-form-booleancheckbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+}
+#hubspot-contact-form .hs-form .hs-form-booleancheckbox input {
+  margin-top: 0.25rem;
+  accent-color: #e11d48;
+}
+#hubspot-contact-form .hs-form .hs-form-booleancheckbox label {
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: #334155;
+  margin-bottom: 0;
+}
+#hubspot-contact-form .hs-form .hs-form-booleancheckbox label a {
+  color: #e11d48;
+  font-weight: 500;
+}
+#hubspot-contact-form .hs-form .hubspot-submit-btn,
+#hubspot-contact-form .hs-form .hs-button,
+#hubspot-contact-form .hs-form input[type="submit"] {
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  color: #fff !important;
+  background: #1330F4 !important;
+  border: none !important;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+}
+#hubspot-contact-form .hs-form .hubspot-submit-btn:hover,
+#hubspot-contact-form .hs-form .hs-button:hover,
+#hubspot-contact-form .hs-form input[type="submit"]:hover {
+  opacity: 0.95;
+}
+#hubspot-contact-form .submitted-message {
+  font-size: 1rem;
+  color: #22c55e;
+  padding: 1rem 0;
+}

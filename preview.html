@@ -1,0 +1,2006 @@
+<!DOCTYPE html>
+<html lang="es">
+<!--
+  Cómo abrir en el navegador:
+  1. Doble clic en este archivo, o
+  2. Ejecutar: npm run preview
+     Luego abrir: http://localhost:3333/preview.html
+
+  NOTA: La versión interactiva con GlowingEffect (seguimiento del mouse) está en la app Next.js.
+  Ejecuta "npm run dev" y abre http://localhost:3000 para ver el efecto de brillo en las tarjetas.
+-->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Rebels - Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    @font-face {
+      font-family: 'Ambit';
+      src: url('Fuentes/Ambit SemiBold.otf') format('opentype');
+      font-weight: 600;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Ambit';
+      src: url('Fuentes/Ambit Bold.otf') format('opentype');
+      font-weight: 700;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Ambit';
+      src: url('Fuentes/Ambit Regular.otf') format('opentype');
+      font-weight: 400;
+      font-style: normal;
+    }
+  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          keyframes: {
+            'accordion-down': {
+              from: { height: '0' },
+              to: { height: 'var(--radix-accordion-content-height)' }
+            },
+            'accordion-up': {
+              from: { height: 'var(--radix-accordion-content-height)' },
+              to: { height: '0' }
+            },
+            'logo-scroll': {
+              '0%': { transform: 'translateX(0)' },
+              '100%': { transform: 'translateX(-50%)' }
+            }
+          },
+          animation: {
+            'accordion-down': 'accordion-down 0.2s ease-out',
+            'accordion-up': 'accordion-up 0.2s ease-out',
+            'logo-scroll': 'logo-scroll 35s linear infinite'
+          },
+          fontFamily: {
+            title: ['Ambit', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            db: { 100: '#1a1a1f', 200: '#0f0f14', 300: '#0a0a0f', 400: '#060609', 500: '#000000' },
+            fs: { 50: '#f5f5f5', 100: '#e5e5e5', 200: '#d4d4d4', 300: '#a3a3a3', 400: '#737373', 500: '#525252' },
+            'gray-dr': { 50: '#fafafa', 100: '#f5f5f5', 200: '#e5e5e5' },
+            'blue-main': '#1330F4',
+            violet: { 50: '#f5f3ff', 100: '#ede9fe', 200: '#c4b5fd', 300: '#a78bfa', 400: '#8b5cf6', 500: '#6d28d9' },
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    /* html/body transparent: shader-glow (z-0) es el único fondo visible */
+    html { background: transparent; scroll-behavior: smooth; }
+    body { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; background: transparent; min-height: 100vh; }
+    h1, h2, h3, h4, h5, h6 { font-family: 'Ambit', ui-sans-serif, system-ui, sans-serif; }
+    .font-title { font-family: 'Ambit', ui-sans-serif, system-ui, sans-serif; }
+    .font-sans { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; }
+    @keyframes mtp-pulse { 0%, 100% { opacity: 1; filter: brightness(1); } 50% { opacity: 0.85; filter: brightness(1.35); } }
+    .animate-mtp-pulse { animation: mtp-pulse 3s ease-in-out infinite; }
+    @keyframes shader-glow-1 { 0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.6; } 50% { transform: translate(5%, -5%) scale(1.1); opacity: 0.8; } }
+    @keyframes shader-glow-2 { 0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.4; } 50% { transform: translate(-3%, 8%) scale(1.15); opacity: 0.6; } }
+    @keyframes shader-glow-3 { 0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.5; } 50% { transform: translate(8%, 3%) scale(1.08); opacity: 0.7; } }
+    .shader-glow { position: fixed; inset: 0; z-index: 0; width: 100%; height: 100vh; min-height: 100vh; pointer-events: none; overflow: hidden; background: #000; }
+    .shader-glow .orb { position: absolute; border-radius: 50%; filter: blur(80px); mix-blend-mode: screen; }
+    .shader-glow .orb-1 { width: 60vw; height: 60vw; top: -10%; right: -10%; background: radial-gradient(circle, rgba(255, 100, 80, 0.1) 0%, rgba(180, 50, 120, 0.06) 40%, transparent 70%); animation: shader-glow-1 6s ease-in-out infinite; }
+    .shader-glow .orb-2 { width: 50vw; height: 50vw; bottom: -15%; left: -5%; background: radial-gradient(circle, rgba(100, 150, 255, 0.08) 0%, rgba(80, 100, 200, 0.05) 50%, transparent 70%); animation: shader-glow-2 7s ease-in-out infinite 1s; }
+    .shader-glow .orb-3 { width: 45vw; height: 45vw; top: 40%; left: 30%; background: radial-gradient(circle, rgba(200, 100, 255, 0.08) 0%, rgba(150, 80, 180, 0.05) 50%, transparent 70%); animation: shader-glow-3 8s ease-in-out infinite 2s; }
+    .glow-card { position: relative; }
+    .glow-effect { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; pointer-events: none; z-index: 1; }
+    .glow-gradient { position: absolute; inset: 0; padding: 2px; box-sizing: border-box; border-radius: inherit; transition: opacity 0.25s ease-out; -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+    /* Borde sutil para tarjetas default (GenAI section) */
+    .glow-card[data-glow-variant="default"] .glow-gradient { background: rgba(255,255,255,0.08); }
+    /* Success stories: borde base via wrapper bg — glow-gradient oculto (alinea con React opacity-0) */
+    #success-stories-grid .glow-card[data-glow-variant="default"] .glow-gradient { opacity: 0; }
+    #success-stories-grid .glow-card[data-glow-variant="rainbow"] .glow-gradient { opacity: 0; }
+    /* Borde degradado visible para tarjeta Vibrant AI Pioneer — siempre activo */
+    .glow-card[data-glow-variant="pink-purple"] .glow-gradient { background: linear-gradient(135deg, #B282FF 0%, #FF7EC7 50%, #9038FF 100%); opacity: 1; }
+    /* Borde arcoíris para rainbow variant (GenAI section) */
+    .glow-card[data-glow-variant="rainbow"] .glow-gradient { background: conic-gradient(from 90deg at 50% 50%, #e2c9fb 0%, #6a3fd1 40%, #ff6b6b 60%, #ff9a56 80%, #e2c9fb 100%); }
+    /* Curriculum cards - interacción tipo DestinationCard */
+    .curriculum-card { display: block; position: relative; border-radius: 0.75rem; overflow: hidden; min-height: 420px; box-shadow: 0 0 40px -15px rgba(88, 28, 135, 0.5); transition: transform 0.5s ease-in-out, box-shadow 0.5s ease-in-out; }
+    .curriculum-card:hover { transform: scale(1.05); box-shadow: 0 0 60px -15px rgba(88, 28, 135, 0.6); }
+    .curriculum-card__bg { position: absolute; inset: 0; background-size: cover; background-position: center; transition: transform 0.5s ease-in-out; }
+    .curriculum-card:hover .curriculum-card__bg { transform: scale(1.1); }
+    /* Doble capa: 1) Oscurecimiento base 2) Gradiente de marca #682AC6 (de abajo a arriba) */
+    .curriculum-card__overlay-base { position: absolute; inset: 0; background-color: rgba(0, 0, 0, 0.5); z-index: 0; }
+    .curriculum-card__overlay-gradient { position: absolute; inset: 0; background: linear-gradient(to top, #682AC6 0%, rgba(104, 42, 198, 0.6) 50%, transparent 100%); z-index: 10; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    /* Logo cloud - infinite scroll (cinta sin fin) */
+    @keyframes logo-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    .logo-cloud-track {
+      animation: logo-scroll 30s linear infinite;
+      will-change: transform;
+    }
+    /* Bounding Box - cajas contenedoras para normalizar peso visual */
+    .logo-box { display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .logo-box-standard { width: 160px; height: 60px; }
+    .logo-box-horizontal { width: 128px; height: 48px; }
+    .logo-box-thin { width: 160px; height: 64px; }
+    .logo-box-heavy { width: 136px; height: 52px; }
+    .logo-box-oval { width: 176px; height: 66px; }
+    .logo-box-liverpool { width: 200px; height: 80px; }
+    .logo-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .logo-cloud-fade { pointer-events: none; position: absolute; top: 0; bottom: 0; width: 120px; z-index: 2; }
+    .logo-cloud-fade-left { left: 0; background: linear-gradient(to right, #f3f4f6, transparent); }
+    .logo-cloud-fade-right { right: 0; background: linear-gradient(to left, #f3f4f6, transparent); }
+    /* Hero carousel — efecto grupo: dim + scale-down en todos, scale-up en el hovered */
+    .hero-images-inner { }
+    .hero-images-inner:hover .hero-img-item {
+      transform: scale(0.95);
+      opacity: 0.5;
+      transition: transform 0.5s ease, opacity 0.5s ease;
+    }
+    .hero-images-inner .hero-img-item:hover {
+      transform: scale(1.1) !important;
+      opacity: 1 !important;
+      transition: transform 0.5s ease, opacity 0.5s ease;
+    }
+    /* Image Swiper - Global Movement (card stack + swipe) */
+    .image-swiper-stack { touch-action: none; transform-style: preserve-3d; }
+    .image-swiper-stack .image-card { transition: transform 0.3s ease, opacity 0.3s ease; }
+    /* Beyond Data - Podcast cards thumb + animación Gallery6 (scale on hover) */
+    .podcast-thumb { background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #1e3a8a 100%); background-size: cover; }
+    .podcast-thumb-pattern { background-image: url('Background podcast.png'); background-size: 120% 120%; background-position: center; opacity: 0.15; mix-blend-mode: overlay; }
+    .podcast-card-img-wrap { transition: transform 0.3s ease; }
+    .podcast-card.group:hover .podcast-card-img-wrap { transform: scale(1.05); }
+    /* Beyond Data Isologo - animación ondas de frecuencia */
+    @keyframes beyond-data-wave {
+      0%, 100% { transform: scaleY(0.85); }
+      25% { transform: scaleY(1.15); }
+      50% { transform: scaleY(0.9); }
+      75% { transform: scaleY(1.1); }
+    }
+    .beyond-data-bar {
+      transform-origin: center 85%;
+      animation: beyond-data-wave 3s ease-in-out infinite;
+    }
+    .beyond-data-bar:nth-child(2) { animation-delay: 0s; }
+    .beyond-data-bar:nth-child(3) { animation-delay: 0.4s; }
+    .beyond-data-bar:nth-child(4) { animation-delay: 0.8s; }
+    .beyond-data-bar:nth-child(5) { animation-delay: 1.2s; }
+    /* FAQ Accordion - transición tipo Radix accordion-down/up (0.2s ease-out) */
+    .faq-answer-wrap {
+      overflow: hidden;
+      transition: max-height 0.2s ease-out, opacity 0.2s ease-out;
+    }
+    .faq-answer-wrap[aria-hidden="true"] { max-height: 0; opacity: 0; }
+    .faq-answer-wrap[aria-hidden="false"] { max-height: 500px; opacity: 1; }
+    /* =====================================================
+       BACKGROUND RESPONSIVO Hero→MTP
+       ===================================================== */
+    .hero-section-bg-html {
+      background-image: url('mobile-background.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    @media (min-width: 640px) {
+      .hero-section-bg-html {
+        background-image: url('Background-Principal.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+      }
+    }
+
+    /* =====================================================
+       RESPONSIVE: Móvil (<640px) y Tablet (768px)
+       ===================================================== */
+
+    /* Móvil: body text 14px/18px para párrafos descriptivos */
+    @media (max-width: 639px) {
+      .body-text-responsive {
+        font-size: 14px !important;
+        line-height: 18px !important;
+      }
+      /* MTP tagline → Inter Bold 14px/18px blanco en móvil */
+      .mtp-tagline {
+        font-family: 'Inter', ui-sans-serif, system-ui, sans-serif !important;
+        font-size: 14px !important;
+        line-height: 18px !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+      }
+      /* Navbar: oculta CTA desktop, muestra botón Mobile */
+      .nav-desktop-cta { display: none !important; }
+      .nav-mobile-btn { display: flex !important; }
+      /* Hero: botones en columna en móvil */
+      .hero-btns { flex-direction: column !important; width: 100% !important; }
+      .hero-btn-item { flex: none !important; width: 100% !important; text-align: center; justify-content: center; }
+      /* Hero: párrafo 14px/18px */
+      .hero-body { font-size: 14px !important; line-height: 18px !important; }
+      /* Hero: imágenes scrollables en móvil */
+      .hero-images-scroll { overflow-x: auto !important; -ms-overflow-style: none; scrollbar-width: none; }
+      .hero-images-scroll::-webkit-scrollbar { display: none; }
+      .hero-images-inner { width: max-content !important; }
+      .hero-img-item { width: 120px !important; flex: none !important; }
+      /* H2 sections → 24px en móvil */
+      .h2-section { font-size: 24px !important; }
+      /* Secciones Problem/ExplosiveDemand → padding reducido */
+      .section-problem, .section-explosive { padding-top: 2rem !important; padding-bottom: 2rem !important; }
+    }
+
+    /* Tablet (768px): padding 40px, tipografía DS */
+    @media (min-width: 768px) {
+      .mtp-tagline {
+        font-family: 'Ambit', ui-sans-serif, system-ui, sans-serif !important;
+        color: #fff !important;
+        font-size: 24px !important;
+        line-height: 1.25 !important;
+        font-weight: 600 !important;
+      }
+      .tablet-px { padding-left: 2.5rem !important; padding-right: 2.5rem !important; }
+      /* En tablet los botones del Hero van en fila */
+      .hero-btns { flex-direction: row !important; width: auto !important; }
+      .hero-btn-item { flex: none !important; padding-left: 1.5rem !important; padding-right: 1.5rem !important; }
+      /* Explosive Demand: derecha desde tablet */
+      .explosive-section { margin-left: auto !important; text-align: right !important; }
+
+      /*
+        ── MENÚ FLOTANTE: tablet ──────────────────────────────────────────────
+        El nav usa .tablet-px = padding-right 40px.
+        El card se alinea por su borde derecho al mismo nivel que el trigger.
+        right = 40px → borde del card = borde del trigger en tablet ✓
+      */
+      #mobile-menu-panel {
+        right: 40px;
+      }
+    }
+    /* Desktop lg+ (1024px): nav completo visible, hamburguesa oculto */
+    @media (min-width: 1024px) {
+      .nav-mobile-btn { display: none !important; }
+      .nav-desktop-cta { display: inline-flex !important; }
+      /* H1 Hero: 48px / 56px — spec DS Desktop */
+      .hero-h1 { font-size: 48px !important; line-height: 56px !important; }
+      /* Body texts: 16px/24px en desktop */
+      .body-text-responsive { font-size: 16px !important; line-height: 24px !important; }
+      /* H2 sections: 32px en desktop */
+      .h2-section-desktop { font-size: 32px !important; }
+      /* MTP heading: 32px/40px en desktop */
+      .mtp-heading { font-size: 32px !important; line-height: 40px !important; }
+      /* Explosive Demand: right-aligned en desktop */
+      .explosive-section { margin-left: auto !important; text-align: right !important; }
+    }
+
+    /* =====================================================
+       MOBILE MENU — Floating Card (popup desde top-right)
+       ===================================================== */
+
+    /* Backdrop — fixed al viewport, debajo del nav (z-50) */
+    #mobile-menu-backdrop {
+      position: fixed; inset: 0; z-index: 49;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    #mobile-menu-backdrop.is-open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /*
+      FLOATING CARD — GEOMETRÍA DE ALINEACIÓN:
+        Trigger: top=14px right=24px (viewport)
+        Card:    top=8px  right=12px
+        position: absolute dentro de nav#navbar-header (position: fixed)
+        → mismo reference frame que el trigger, sin ambigüedad viewport vs contenedor.
+
+        Card sin header propio:
+          top = 64px  → aparece flush bajo el header bar (h-16)
+          right = nav padding right → borde del card = borde del trigger
+            mobile (< md):  right = 24px  (px-6)
+            tablet (md+):   right = 40px  (px-10, via @media 768px)
+    */
+    #mobile-menu-panel {
+      position: absolute;   /* relativo al nav#navbar-header (fixed) */
+      top: 64px;
+      right: 24px;
+      z-index: 55;
+      width: min(340px, calc(100vw - 64px)); /* safe area en cualquier viewport */
+      background: #1a1a1a;
+      border: none;
+      border-radius: 16px; /* rounded-2xl — widget flotante */
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 20px 60px rgba(0,0,0,0.75);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      /* Estado inicial */
+      opacity: 0;
+      transform: scale(0.80) translateY(-8px);
+      transform-origin: top right;
+      pointer-events: none;
+      transition:
+        opacity 0.22s ease,
+        transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    #mobile-menu-panel.is-open {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      pointer-events: auto;
+    }
+
+    /* Label DS: Inter SemiBold 12px/16px/2px/uppercase — CLOSE + MENU */
+    .menu-label {
+      font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 16px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* Copyright DS: Inter SemiBold 10px/16px/2px/uppercase */
+    .menu-copyright {
+      font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      line-height: 16px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+    }
+
+    /* Nav links DS: Inter Regular 24px / LH 32px */
+    .menu-nav-link {
+      font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+      font-size: 24px;
+      font-weight: 400;
+      line-height: 32px;
+      letter-spacing: 0px;
+      color: #ffffff;
+      display: block;
+      padding: 12px 0;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+    .menu-nav-link:hover { color: #c4b5fd; }
+
+    /* "Get in touch" */
+    .menu-get-in-touch {
+      font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+      font-size: 24px;
+      font-weight: 400;
+      line-height: 32px;
+      color: #a78bfa;
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 0; margin-top: 4px;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+    .menu-get-in-touch:hover { color: #c4b5fd; }
+    .menu-get-in-touch .arrow-circle {
+      flex-shrink: 0; width: 36px; height: 36px;
+      border-radius: 50%; background: #1330F4;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* Stagger: ítem sube de abajo y aparece */
+    .menu-item-animate {
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+    }
+    #mobile-menu-panel.is-open .menu-item-animate:nth-child(1) { transition-delay: 0.08s; opacity:1; transform:none; }
+    #mobile-menu-panel.is-open .menu-item-animate:nth-child(2) { transition-delay: 0.14s; opacity:1; transform:none; }
+    #mobile-menu-panel.is-open .menu-item-animate:nth-child(3) { transition-delay: 0.20s; opacity:1; transform:none; }
+    #mobile-menu-panel.is-open .menu-item-animate:nth-child(4) { transition-delay: 0.26s; opacity:1; transform:none; }
+    #mobile-menu-panel.is-open .menu-item-animate:nth-child(5) { transition-delay: 0.32s; opacity:1; transform:none; }
+    .menu-footer-animate {
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.25s ease-out 0.38s, transform 0.25s ease-out 0.38s;
+    }
+    #mobile-menu-panel.is-open .menu-footer-animate { opacity:1; transform:none; }
+
+    /* Social icon — degradado #B282FF → #9038FF, icono blanco */
+    .menu-social-icon {
+      width: 40px; height: 40px; border-radius: 8px;
+      background: linear-gradient(180deg, #B282FF 0%, #9038FF 100%);
+      display: flex; align-items: center; justify-content: center;
+      color: #ffffff; text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .menu-social-icon:hover { opacity: 0.85; }
+
+    /* Contact - HubSpot form */
+    #hubspot-contact-form .hs-form .hs-form-field { margin-bottom: 1.25rem; }
+    #hubspot-contact-form .hs-form label { display: block; font-size: 0.875rem; font-weight: 500; color: #334155; margin-bottom: 0.5rem; }
+    #hubspot-contact-form .hs-form .hs-input,
+    #hubspot-contact-form .hs-form input[type="text"],
+    #hubspot-contact-form .hs-form input[type="email"],
+    #hubspot-contact-form .hs-form textarea {
+      width: 100%; padding: 0.75rem 1rem; font-size: 0.9375rem; color: #1e293b; background: #fff;
+      border: 1px solid #e5e7eb; border-radius: 0.75rem; transition: border-color 0.2s;
+    }
+    #hubspot-contact-form .hs-form .hs-input:focus,
+    #hubspot-contact-form .hs-form input:focus,
+    #hubspot-contact-form .hs-form textarea:focus {
+      outline: none; border-color: #1330F4; box-shadow: 0 0 0 3px rgba(19, 48, 244, 0.1);
+    }
+    #hubspot-contact-form .hs-form textarea { min-height: 120px; resize: vertical; }
+    #hubspot-contact-form .hs-form .hs-button,
+    #hubspot-contact-form .hs-form input[type="submit"] {
+      width: 100%; padding: 0.875rem 1.5rem; font-size: 1rem; font-weight: 600; color: #fff !important;
+      background: #1330F4 !important; border: none !important; border-radius: 9999px; cursor: pointer;
+    }
+    #hubspot-contact-form .hs-form .hs-form-booleancheckbox { display: flex; align-items: flex-start; gap: 0.75rem; margin: 1rem 0 1.5rem; }
+    #hubspot-contact-form .hs-form .hs-form-booleancheckbox input { margin-top: 0.25rem; accent-color: #e11d48; }
+    #hubspot-contact-form .hs-form .hs-form-booleancheckbox label { line-height: 1.4; color: #334155; }
+    /* Outline CTA homologado - stroke #EA366B, texto blanco Inter Semibold 16px/24px */
+    /* Header scroll animation - blur, rounded, shadow cuando scroll > 10px */
+    #navbar-header {
+      transition: background 0.3s ease-out, box-shadow 0.3s ease-out, border-color 0.3s ease-out, max-width 0.3s ease-out;
+      left: 50%;
+      transform: translateX(-50%);
+      max-width: 64rem;
+      border-radius: 0 0 0.375rem 0.375rem;
+      border: 1px solid transparent;
+    }
+    #navbar-header.header-scrolled {
+      background: rgba(0, 0, 0, 0.98) !important;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-color: rgba(0, 0, 0, 0.12);
+      max-width: 56rem;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 0, 0, 0.06);
+    }
+    #navbar-header .navbar-inner {
+      transition: padding 0.3s ease-out;
+    }
+    #navbar-header.header-scrolled .navbar-inner {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+    @media (max-width: 767px) {
+      #navbar-header {
+        border-radius: 0;
+        left: 0;
+        transform: none;
+        max-width: 100%;
+      }
+      #navbar-header.header-scrolled {
+        max-width: 100%;
+      }
+    }
+    /* Header nav links - Inter semibold 16px/24px, grey→white on hover */
+    .nav-link-header {
+      font-family: 'Inter', ui-sans-serif, system-ui, sans-serif !important;
+      font-size: 16px !important;
+      font-weight: 600 !important;
+      line-height: 24px !important;
+      color: #d4d4d4;
+      transition: color 0.2s ease;
+    }
+    .nav-link-header:hover {
+      color: #fff;
+    }
+    .outline-cta {
+      border: 2px solid #EA366B !important;
+      color: #fff !important;
+      font-family: 'Inter', ui-sans-serif, system-ui, sans-serif !important;
+      font-size: 16px !important;
+      font-weight: 600 !important;
+      line-height: 24px !important;
+    }
+    /* Liquid Glass - botones sin relleno */
+    .liquid-glass-btn {
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .liquid-glass-btn:hover:not(:disabled) {
+      transform: scale(1.05);
+    }
+    .liquid-glass-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      box-shadow:
+        0 0 6px rgba(0,0,0,0.03),
+        0 2px 6px rgba(0,0,0,0.08),
+        inset 3px 3px 0.5px -3px rgba(0,0,0,0.3),
+        inset -3px -3px 0.5px -3px rgba(0,0,0,0.25),
+        inset 1px 1px 1px -0.5px rgba(0,0,0,0.15),
+        inset -1px -1px 1px -0.5px rgba(0,0,0,0.15),
+        inset 0 0 6px 6px rgba(0,0,0,0.06),
+        inset 0 0 2px 2px rgba(0,0,0,0.03),
+        0 0 12px rgba(255,255,255,0.12);
+      transition: box-shadow 0.3s ease;
+    }
+    .liquid-glass-btn:hover:not(:disabled)::before {
+      box-shadow:
+        0 0 8px rgba(0,0,0,0.04),
+        0 4px 8px rgba(0,0,0,0.1),
+        inset 3px 3px 0.5px -3px rgba(0,0,0,0.25),
+        inset -3px -3px 0.5px -3px rgba(0,0,0,0.2),
+        inset 1px 1px 1px -0.5px rgba(255,255,255,0.08),
+        inset -1px -1px 1px -0.5px rgba(255,255,255,0.06),
+        inset 0 0 8px 8px rgba(255,255,255,0.08),
+        inset 0 0 3px 3px rgba(255,255,255,0.04),
+        0 0 16px rgba(255,255,255,0.18);
+    }
+    /* Shiny CTA - Header y Footer */
+    .shiny-cta {
+      --shiny-bg: #1330f4;
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.625rem 1.5rem;
+      font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 24px;
+      border-radius: 360px;
+      color: #fff;
+      background: var(--shiny-bg);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: box-shadow 0.4s ease, filter 0.4s ease;
+    }
+    .shiny-cta::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: inherit;
+      padding: 2px;
+      background: conic-gradient(from 0deg, transparent 0%, #3b82f6 10%, #93c5fd 20%, #3b82f6 30%, transparent 40%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      animation: shiny-rotate 3s linear infinite;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      pointer-events: none;
+    }
+    .shiny-cta::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.15) 50%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      pointer-events: none;
+    }
+    .shiny-cta:hover {
+      box-shadow: 0 0 24px rgba(59, 130, 246, 0.4);
+      filter: brightness(1.05);
+    }
+    .shiny-cta:hover::before,
+    .shiny-cta:hover::after {
+      opacity: 1;
+    }
+    @keyframes shiny-rotate {
+      to { transform: rotate(360deg); }
+    }
+    /* Podcast carousel nav - activo: azul sólido; deshabilitado: sin relleno, borde sutil */
+    .podcast-nav-btn {
+      height: 2.5rem;
+      width: 2.5rem;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      outline: none;
+      cursor: pointer;
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+      flex-shrink: 0;
+    }
+    .podcast-nav-btn:not(:disabled) {
+      background-color: #2563eb;
+      color: #fff;
+      border: 1px solid transparent;
+      box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    }
+    .podcast-nav-btn:not(:disabled):hover {
+      background-color: #1d4ed8;
+    }
+    .podcast-nav-btn:disabled {
+      background-color: transparent;
+      color: #cbd5e1;
+      border: 1px solid #f1f5f9;
+      cursor: not-allowed;
+      pointer-events: none;
+      box-shadow: none;
+    }
+  </style>
+</head>
+<body class="min-h-screen text-white antialiased font-sans">
+  <!-- Simulación NeuralBackground (en Next.js: NeuralBackground z-0, onda CPPN WebGL) -->
+  <div class="shader-glow">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+  <!-- Navbar - Inter semibold 16px/24px, animación scroll -->
+  <nav id="navbar-header" class="fixed top-0 z-50 w-full border-b border-white/10" style="background-color: #000;">
+    <div class="navbar-inner max-w-7xl mx-auto px-6 tablet-px h-16 flex items-center justify-between">
+      <a href="#" class="flex-shrink-0"><img src="Logo-white.svg" alt="Data Rebels" class="h-5 w-auto" /></a>
+
+      <!-- Desktop lg+: links de navegación -->
+      <div class="hidden lg:flex items-center gap-8">
+        <a href="#solutions" class="nav-link-header">Solutions</a>
+        <a href="#case-studies" class="nav-link-header">Case studies</a>
+        <a href="#programs" class="nav-link-header">Our Programs</a>
+        <a href="#podcast" class="nav-link-header">Podcast</a>
+      </div>
+
+      <!-- Desktop lg+: CTA "Explore Solutions" -->
+      <a href="#contact" class="nav-desktop-cta shiny-cta font-sans flex items-center gap-2" style="display:none;">
+        Explore Solutions <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </a>
+
+      <!-- Móvil/Tablet (<lg): botón morph hamburguesa → X -->
+      <button id="nav-trigger-btn" type="button" aria-label="Abrir menú" onclick="toggleMobileMenu()"
+        class="nav-mobile-btn flex items-center gap-2 text-white" style="position:relative;z-index:60;">
+        <!-- Label se desvanece al abrir (el card muestra "CLOSE") -->
+        <span id="nav-trigger-label" class="menu-label" style="color:#fff;transition:opacity .2s ease;">Menu</span>
+        <span style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background-color:#1330F4;flex-shrink:0;position:relative;">
+          <!-- 3 líneas morphing -->
+          <span id="morph-top"    style="position:absolute;left:8px;height:2px;width:20px;background:white;border-radius:2px;transform-origin:center;transition:top 0.3s ease,transform 0.3s ease;top:11px;transform:translateY(0) rotate(0deg);"></span>
+          <span id="morph-mid"    style="position:absolute;left:8px;height:2px;width:20px;background:white;border-radius:2px;transform-origin:center;transition:width 0.2s ease,opacity 0.2s ease;top:17px;transform:translateY(0);"></span>
+          <span id="morph-bottom" style="position:absolute;left:8px;height:2px;width:20px;background:white;border-radius:2px;transform-origin:center;transition:top 0.3s ease,transform 0.3s ease;top:23px;transform:translateY(0) rotate(0deg);"></span>
+        </span>
+      </button>
+    </div>
+
+    <!-- ===== FLOATING CARD — absolute dentro del nav fixed ===== -->
+    <!-- Al ser absolute dentro del nav, comparte exactamente el mismo reference frame
+         que el trigger (mismo containing block). Elimina cualquier desincronización. -->
+  <div id="mobile-menu-panel" role="dialog" aria-modal="true" aria-label="Menú de navegación">
+    <!--
+      Card sin header row — CLOSE+X lo gestiona el header trigger in-place.
+      El card empieza directamente con los nav links.
+    -->
+
+    <!-- Nav links con stagger -->
+    <nav style="display:flex; flex-direction:column; padding: 20px 24px 8px;">
+      <div class="menu-item-animate"><a href="#solutions"    class="menu-nav-link" onclick="closeMobileMenu()">Solutions</a></div>
+      <div class="menu-item-animate"><a href="#case-studies" class="menu-nav-link" onclick="closeMobileMenu()">Case studies</a></div>
+      <div class="menu-item-animate"><a href="#programs"     class="menu-nav-link" onclick="closeMobileMenu()">Our Programs</a></div>
+      <div class="menu-item-animate"><a href="#podcast"      class="menu-nav-link" onclick="closeMobileMenu()">Podcast</a></div>
+
+      <!-- Get in touch -->
+      <div class="menu-item-animate">
+        <a href="#contact" class="menu-get-in-touch" onclick="closeMobileMenu()">
+          Get in touch
+          <span class="arrow-circle" style="background:#1330F4;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+          </span>
+        </a>
+      </div>
+    </nav>
+
+    <!-- Divisor -->
+    <div style="margin: 0 24px; height:1px; background:rgba(255,255,255,0.1);"></div>
+
+    <!-- Footer: social + copyright -->
+    <div class="menu-footer-animate" style="padding: 16px 24px 20px; display:flex; flex-direction:column; gap:12px;">
+      <div style="display:flex; gap:10px;">
+        <a href="https://www.linkedin.com/company/datarebelsmx/" target="_blank" rel="noopener" aria-label="LinkedIn" class="menu-social-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        </a>
+        <a href="https://www.instagram.com/datarebels.mx/" target="_blank" rel="noopener" aria-label="Instagram" class="menu-social-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        </a>
+        <a href="https://x.com/Eduardo_dlgs" target="_blank" rel="noopener" aria-label="X (Twitter)" class="menu-social-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </a>
+      </div>
+      <p class="menu-copyright">©2026 DATA REBELS. ALL RIGHTS RESERVED</p>
+    </div>
+  </div>
+  <!-- ===== END FLOATING CARD ===== -->
+</nav>
+
+<!-- Backdrop — fixed al viewport, z-49 (debajo del nav z-50) — clic cierra el menú -->
+<div id="mobile-menu-backdrop" onclick="closeMobileMenu()" aria-hidden="true"></div>
+
+  <!-- Main: relative z-10 bg-transparent - shader visible -->
+  <main class="relative z-10 pt-16 overflow-x-hidden bg-transparent min-h-screen flex flex-col">
+    <!-- Contenedor con fondo responsivo desde Hero hasta MTP -->
+    <div class="relative w-full">
+      <div class="absolute inset-0 hero-section-bg-html"></div>
+      <div class="relative z-10 max-w-7xl mx-auto px-6 tablet-px lg:px-8 bg-transparent">
+      <!-- Hero (fondo Background-Principal) -->
+      <section class="pt-16 pb-12 min-h-[70vh] flex flex-col justify-center bg-transparent">
+        <!-- H1: Ambit SemiBold 32px base → 48px/56px desktop (lg+) -->
+        <h1 class="hero-h1 font-title text-white font-semibold leading-tight mb-6 max-w-3xl" style="font-size:32px;letter-spacing:0px;">
+          The Future of AI is Built Here. Become One of Our <span class="font-semibold">100K Rebels.</span>
+        </h1>
+
+        <!-- 6 IMÁGENES: scrollable en móvil, full-width en desktop — no clickeables, hover scale-105 -->
+        <div class="hero-images-scroll w-screen relative mb-6" style="transform: translateX(-50%); left: 50%; padding-left:1rem; padding-right:1rem;">
+          <div class="hero-images-inner flex items-stretch gap-3 w-full">
+            <div class="hero-img-item relative flex-1 overflow-hidden rounded-2xl" style="aspect-ratio: 3/4; min-width:0; transition: transform 0.3s ease;">
+              <img src="community-01-demoday.png" alt="Semillero de talento - Demoday" style="width:100%;height:100%;object-fit:cover;" />
+            </div>
+            <div class="hero-img-item relative flex-1 overflow-hidden rounded-2xl" style="aspect-ratio: 3/4; min-width:0; transition: transform 0.3s ease;">
+              <img src="community-02-woman-presenting.png" alt="Presentación Machine Learning y análisis de datos" style="width:100%;height:100%;object-fit:cover;object-position:center;" />
+            </div>
+            <div class="hero-img-item relative flex-1 overflow-hidden rounded-2xl" style="aspect-ratio: 3/4; min-width:0; transition: transform 0.3s ease;">
+              <img src="community-03-woman-portrait.png" alt="Rebel en espacio Data Rebels" style="width:100%;height:100%;object-fit:cover;" />
+            </div>
+            <div class="hero-img-item relative flex-1 overflow-hidden rounded-2xl" style="aspect-ratio: 3/4; min-width:0; transition: transform 0.3s ease;">
+              <img src="community-04-man-presenting.png" alt="Presentación en evento Data Rebels" style="width:100%;height:100%;object-fit:cover;" />
+            </div>
+            <div class="hero-img-item relative flex-1 overflow-hidden rounded-2xl" style="aspect-ratio: 3/4; min-width:0; transition: transform 0.3s ease;">
+              <img src="community-05-woman-red-glasses.png" alt="Análisis exploratorio y visualización - presentación" style="width:100%;height:100%;object-fit:cover;" />
+            </div>
+            <div class="hero-img-item relative flex-1 overflow-hidden rounded-2xl" style="aspect-ratio: 3/4; min-width:0; transition: transform 0.3s ease;">
+              <img src="community-06-team-meeting.png" alt="Equipo Data Rebels en reunión colaborativa" style="width:100%;height:100%;object-fit:cover;" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Párrafo + Botones: stack vertical → lg horizontal -->
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4 lg:gap-8 relative z-10">
+          <p class="body-text-responsive font-sans font-medium max-w-sm" style="color: #F9F9F9; font-size: 16px; line-height: 24px; letter-spacing: 0;">
+            The fastest, most cost-effective way to get your teams using AI.
+          </p>
+          <div class="hero-btns flex flex-col gap-3" style="width:100%;">
+            <a href="#programs" class="hero-btn-item liquid-glass-btn outline-cta inline-flex items-center justify-center px-6 py-3 rounded-full transition-all duration-300 whitespace-nowrap" style="display:flex;">Our programs</a>
+            <a href="#contact" class="hero-btn-item shiny-cta font-sans inline-flex items-center justify-center px-6 py-3 whitespace-nowrap" style="display:flex;">Enroll a Rebel Today</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- The Problem - siempre izquierda -->
+      <section class="py-12 max-w-2xl bg-transparent">
+        <!-- H2: 24px base → 32px desktop -->
+        <h2 class="h2-section-desktop font-title text-white font-semibold mb-4" style="font-size:24px;">The problem: The Talent Gap Crisis</h2>
+        <p class="body-text-responsive font-sans text-gray-300" style="font-size:16px;line-height:24px;">
+          <span class="font-semibold text-white">77% of companies in Mexico</span> report a severe shortage of specialized talent in Information Technology (IT), hindering business growth.
+        </p>
+      </section>
+
+      <!-- Explosive Demand - izquierda en móvil, derecha en md+ -->
+      <section class="explosive-section py-12 bg-transparent" style="max-width:42rem;">
+        <!-- H2: 24px base → 32px desktop -->
+        <h2 class="h2-section-desktop font-title text-white font-semibold mb-4" style="font-size:24px;">
+          The <span style="color:#c4b5fd;">Explosive Demand</span> for AI
+        </h2>
+        <p class="body-text-responsive font-sans text-gray-300" style="font-size:16px;line-height:24px;">
+          Demand for Artificial Intelligence experts in Mexico grew by <span class="font-semibold text-white">95%</span> in the last year, tripling the Latin American average.
+        </p>
+      </section>
+
+      <!-- MTP - Centrado -->
+      <section class="pt-16 pb-12 text-center bg-transparent">
+        <!-- Label: Inter SemiBold 12px / LH 16px / LS 2px / blanco — spec DS -->
+        <span class="font-sans font-semibold text-white uppercase block mb-3"
+          style="font-size:12px;line-height:16px;letter-spacing:2px;">OUR MASSIVE TRANSFORMATIONAL PURPOSE</span>
+        <!-- Heading: Ambit SemiBold 24px/32px base → 32px/40px desktop — sin inline style para respetar media query -->
+        <h2 class="mtp-heading font-title text-white font-semibold mb-6 max-w-3xl mx-auto"
+          style="font-size:24px;line-height:32px;letter-spacing:0px;">
+          Closing the GenAI talent gap in Mexico with 100,000 certified Rebels by 2030. <span class="inline-block align-middle animate-mtp-pulse">⚡</span>
+        </h2>
+        <a href="#contact" class="shiny-cta font-sans inline-flex items-center justify-center px-10 py-4">Book a Meeting</a>
+      </section>
+      </div>
+    </div>
+
+    <!-- New Approach — responsivo por breakpoint:
+         mobile (<md):  1-col stats, botón al pie
+         tablet (md):   2×2 stats, botón bajo texto, sin imagen
+         desktop (lg+): layout original con imagen y 4-col stats -->
+    <section class="bg-gray-100 py-12 w-full relative z-10" aria-label="New Approach & Stats">
+      <div class="max-w-7xl mx-auto px-6 md:px-10 lg:px-8">
+        <div class="bg-white rounded-3xl shadow-2xl mx-auto max-w-6xl relative overflow-hidden lg:overflow-visible">
+
+          <!-- BLOQUE SUPERIOR: texto + imagen (solo en lg+) -->
+          <div class="w-full lg:relative lg:flex lg:items-end lg:overflow-visible lg:min-h-[380px]">
+            <div class="flex flex-col p-8 md:p-10 lg:p-16 lg:max-w-xl relative z-10">
+              <div class="mb-5"><img src="Isologo.svg" alt="" class="w-10 h-8 object-contain" /></div>
+              <!-- Título: Ambit Semibold — 24px mobile/tablet, 36px desktop -->
+              <h2 class="font-title text-slate-900 text-2xl lg:text-4xl font-semibold mb-4">Our economy demands a new approach</h2>
+              <!-- Body: Inter Regular 14px/18px mobile·tablet; 15px/relaxed desktop -->
+              <p class="font-sans text-gray-600 text-[14px] leading-[18px] lg:text-[15px] lg:leading-relaxed mb-6 lg:mb-8">We aim to solve this problem by eliminating uncertainty. We achieve this by mapping the precise skills required by the global GenAI market, moving beyond traditional curricula.</p>
+              <!-- Botón: visible en tablet+ (md+), oculto en mobile -->
+              <div class="hidden md:block">
+                <a href="#contact" class="shiny-cta font-sans inline-flex items-center gap-2 px-8 py-3.5 rounded-full w-fit" style="background-color:#1330F4;color:white;">Enroll a Rebel Today <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+              </div>
+            </div>
+
+            <!-- Imagen: SOLO en desktop (lg+) -->
+            <div class="hidden lg:block lg:absolute lg:right-0 lg:bottom-0 lg:w-[48%] lg:min-w-[280px] lg:h-full lg:max-h-[450px] z-10">
+              <img src="IMG.png" alt="Data Rebels team member" class="absolute inset-0 w-full h-full object-contain object-bottom pointer-events-none" />
+            </div>
+          </div>
+
+          <!-- ESTADÍSTICAS
+               mobile: 1-col con separadores horizontales
+               tablet: 2×2 con separadores verticales + horizontales entre celdas
+               desktop: 4-col con solo separadores verticales -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border-t border-slate-100">
+            <!-- i=0: sin bordes en todos los breakpoints -->
+            <div class="flex flex-col items-start justify-center py-8 px-6 text-left border-slate-100">
+              <span class="font-title text-[48px] leading-[56px] font-semibold mb-1 stat-counter" style="color:#1330F4;" data-value="1,135">0</span>
+              <span class="font-sans text-slate-500 text-[14px] leading-[18px]">Rebels Graduated</span>
+            </div>
+            <!-- i=1: mobile→top; tablet→left (clear top); desktop→left -->
+            <div class="flex flex-col items-start justify-center py-8 px-6 text-left border-slate-100 border-t md:border-t-0 md:border-l lg:border-l lg:border-t-0">
+              <span class="font-title text-[48px] leading-[56px] font-semibold mb-1 stat-counter" style="color:#1330F4;" data-value="+357">+0</span>
+              <span class="font-sans text-slate-500 text-[14px] leading-[18px]">Proyectos implementados</span>
+            </div>
+            <!-- i=2: mobile→top; tablet→top (no left); desktop→left (clear top) -->
+            <div class="flex flex-col items-start justify-center py-8 px-6 text-left border-slate-100 border-t lg:border-l lg:border-t-0">
+              <span class="font-title text-[48px] leading-[56px] font-semibold mb-1 stat-counter" style="color:#1330F4;" data-value="8x">0x</span>
+              <span class="font-sans text-slate-500 text-[14px] leading-[18px]">Average ROI on AI Implementations</span>
+            </div>
+            <!-- i=3: mobile→top; tablet→top+left; desktop→left (clear top) -->
+            <div class="flex flex-col items-start justify-center py-8 px-6 text-left border-slate-100 border-t md:border-l lg:border-l lg:border-t-0">
+              <span class="font-title text-[48px] leading-[56px] font-semibold mb-1 stat-counter" style="color:#1330F4;" data-value="91%">0%</span>
+              <span class="font-sans text-slate-500 text-[14px] leading-[18px]">de CSAT alcanzado</span>
+            </div>
+          </div>
+
+          <!-- BOTÓN MOBILE: solo visible en < md, debajo de las estadísticas -->
+          <div class="md:hidden px-8 pb-8 pt-2">
+            <a href="#contact" class="shiny-cta font-sans inline-flex items-center gap-2 px-8 py-3.5 rounded-full w-fit" style="background-color:#1330F4;color:white;">Enroll a Rebel Today <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Logos - Join the 100K Rebels (Infinite Slider) -->
+    <section class="py-6 bg-gray-100 w-full" aria-label="Logos de empresas">
+      <div class="w-full text-center">
+        <p class="font-sans font-semibold text-[12px] leading-[16px] tracking-[2px] uppercase text-slate-500">
+          JOIN THE 100K REBELS IN MÉXICO FROM COMPANIES LIKE...
+        </p>
+        <div class="relative overflow-hidden mt-4 w-full">
+          <div class="logo-cloud-fade logo-cloud-fade-left"></div>
+          <div class="logo-cloud-fade logo-cloud-fade-right"></div>
+          <div class="flex flex-row items-center gap-16 py-4 px-10 logo-cloud-track" style="width: max-content;">
+            <div class="logo-box logo-box-standard"><img src="GRAY-AC.svg" alt="Arca Continental" class="grayscale opacity-50" loading="lazy" /></div>
+            <div class="logo-box logo-box-thin"><img src="GRAY-ALFA.svg" alt="Alfa" class="grayscale opacity-50" loading="lazy" /></div>
+            <div class="logo-box logo-box-oval"><img src="GRAY-BIMBO.svg" alt="Grupo Bimbo" class="grayscale opacity-50" loading="lazy" /></div>
+            <div class="logo-box logo-box-horizontal"><img src="GRAY-CEMEX.svg" alt="Cemex" class="grayscale opacity-40" loading="lazy" /></div>
+            <div class="logo-box logo-box-horizontal"><img src="GRAY-DEACERO.svg" alt="Deacero" class="grayscale opacity-50" loading="lazy" /></div>
+            <div class="logo-box logo-box-heavy"><img src="GRAY-FEMSA.svg" alt="Femsa" class="grayscale opacity-50" loading="lazy" /></div>
+            <div class="logo-box logo-box-standard"><img src="GRAY-GBM.svg" alt="GBM" class="grayscale opacity-50" loading="lazy" /></div>
+            <div class="logo-box logo-box-standard"><img src="GRAY-LAMOSA.svg" alt="Lamosa" class="grayscale opacity-50" loading="lazy" /></div>
+            <div class="logo-box logo-box-liverpool"><img src="GRAY-LIVERPOOL.svg" alt="Liverpool" class="grayscale opacity-50" loading="lazy" /></div>
+            <div class="logo-box logo-box-standard"><img src="GRAY-OXXO.svg" alt="Oxxo" class="grayscale opacity-50" loading="lazy" /></div>
+            <div class="logo-box logo-box-standard"><img src="GRAY-SIGMA.svg" alt="Sigma" class="grayscale opacity-50" loading="lazy" /></div>
+            <div class="logo-box logo-box-standard"><img src="GRAY-TERNIUM.svg" alt="Ternium" class="grayscale opacity-50" loading="lazy" /></div>
+            <!-- Duplicados para loop infinito -->
+            <div class="logo-box logo-box-standard"><img src="GRAY-AC.svg" alt="Arca Continental" class="grayscale opacity-50" loading="lazy" aria-hidden="true" /></div>
+            <div class="logo-box logo-box-thin"><img src="GRAY-ALFA.svg" alt="Alfa" class="grayscale opacity-50" loading="lazy" aria-hidden="true" /></div>
+            <div class="logo-box logo-box-oval"><img src="GRAY-BIMBO.svg" alt="Grupo Bimbo" class="grayscale opacity-50" loading="lazy" aria-hidden="true" /></div>
+            <div class="logo-box logo-box-horizontal"><img src="GRAY-CEMEX.svg" alt="Cemex" class="grayscale opacity-40" loading="lazy" aria-hidden="true" /></div>
+            <div class="logo-box logo-box-horizontal"><img src="GRAY-DEACERO.svg" alt="Deacero" class="grayscale opacity-50" loading="lazy" aria-hidden="true" /></div>
+            <div class="logo-box logo-box-heavy"><img src="GRAY-FEMSA.svg" alt="Femsa" class="grayscale opacity-50" loading="lazy" aria-hidden="true" /></div>
+            <div class="logo-box logo-box-standard"><img src="GRAY-GBM.svg" alt="GBM" class="grayscale opacity-50" loading="lazy" aria-hidden="true" /></div>
+            <div class="logo-box logo-box-standard"><img src="GRAY-LAMOSA.svg" alt="Lamosa" class="grayscale opacity-50" loading="lazy" aria-hidden="true" /></div>
+            <div class="logo-box logo-box-liverpool"><img src="GRAY-LIVERPOOL.svg" alt="Liverpool" class="grayscale opacity-50" loading="lazy" aria-hidden="true" /></div>
+            <div class="logo-box logo-box-standard"><img src="GRAY-OXXO.svg" alt="Oxxo" class="grayscale opacity-50" loading="lazy" aria-hidden="true" /></div>
+            <div class="logo-box logo-box-standard"><img src="GRAY-SIGMA.svg" alt="Sigma" class="grayscale opacity-50" loading="lazy" aria-hidden="true" /></div>
+            <div class="logo-box logo-box-standard"><img src="GRAY-TERNIUM.svg" alt="Ternium" class="grayscale opacity-50" loading="lazy" aria-hidden="true" /></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Close the GenAI Talent Gap -->
+    <section id="solutions" class="relative z-10 overflow-hidden scroll-mt-20" aria-label="Close the GenAI Talent Gap" style="padding-top: 40px; padding-bottom: 40px;">
+      <!-- Fondo: degradado oscuro + imagen texturizada -->
+      <div class="absolute inset-0 z-0 bg-gradient-to-b from-black/90 via-[#0a0612] to-black/95"></div>
+      <div class="absolute inset-0 z-0 opacity-[0.08]" style="background-image: url('WhatsApp Image 2025-12-18 at 16.33.20-3.jpeg'); background-size: cover; background-position: center right; mask-image: linear-gradient(to right, transparent 30%, black 70%); -webkit-mask-image: linear-gradient(to right, transparent 30%, black 70%);"></div>
+
+      <div class="relative z-10 max-w-7xl mx-auto px-6 md:px-10 lg:px-8">
+        <!-- Encabezado y Filtros
+             Desktop (lg): fila única — título izquierda + pills derecha en la misma línea
+             Tablet/Mobile: columna — título arriba, pills abajo -->
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-8 mb-10 lg:mb-16">
+          <!-- Logo + Título — min-w-0 para ceder espacio a las pills en lg:flex-row -->
+          <div class="flex items-center gap-4 min-w-0">
+            <img src="Isologo-white.svg" alt="" class="w-10 h-8 flex-shrink-0 object-contain" />
+            <!-- DS Desktop: H2 Ambit Semibold 32px / Talent Gap en #B282FF -->
+            <h2 class="font-title text-white text-[22px] lg:text-[32px] font-semibold leading-tight">
+              Close the GenAI <span style="color:#B282FF;">Talent Gap</span>. Enroll a Rebel Today.
+            </h2>
+          </div>
+          <!-- OUR FORMATS + pills
+               flex-shrink-0 → no se encoge en desktop, permanece en la misma fila
+               flex-wrap     → salto de línea en mobile/tablet
+               lg:flex-nowrap→ línea única en desktop -->
+          <div class="flex flex-wrap lg:flex-nowrap flex-shrink-0 items-center gap-3">
+            <span class="font-sans text-[11px] font-semibold tracking-[0.15em] text-white/50 uppercase whitespace-nowrap">OUR FORMATS</span>
+              <button class="liquid-glass-btn inline-flex items-center justify-center gap-2 px-4 h-10 rounded-full border border-white/10 bg-black/40 backdrop-blur-md text-white text-sm font-medium hover:border-white/30">
+                <svg class="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="12" rx="2"/><path d="m10 9 5 3-5 3V9z"/></svg>
+                Live Sessions
+              </button>
+              <button class="liquid-glass-btn inline-flex items-center justify-center gap-2 px-4 h-10 rounded-full border border-white/10 bg-black/40 backdrop-blur-md text-white text-sm font-medium hover:border-white/30">
+                <svg class="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                On-demand
+              </button>
+              <button class="liquid-glass-btn inline-flex items-center justify-center gap-2 px-4 h-10 rounded-full border border-white/10 bg-black/40 backdrop-blur-md text-white text-sm font-medium hover:border-white/30">
+                <svg class="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4 8 4v14"/><path d="M9 21V9l6-3 6 3v12"/></svg>
+                Hybrid
+              </button>
+          </div>
+        </div>
+
+        <!-- Grid de Tarjetas — 1-col mobile / 2-col tablet (md) / 3-col desktop (lg) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10" id="glow-cards-grid">
+          <!-- Tarjeta 1: Unique solutions -->
+          <div class="glow-card group relative rounded-2xl p-[2px] transition-all duration-300" data-glow-variant="default">
+            <div class="glow-effect"><div class="glow-gradient"></div></div>
+            <article class="relative z-10 rounded-[calc(1rem-2px)] bg-black/80 backdrop-blur-md border border-white/5 p-6 min-h-full">
+              <div class="absolute top-5 right-5 w-9 h-9 rounded-full bg-white/5 flex items-center justify-center">
+                <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+              </div>
+              <h3 class="font-title text-white text-lg font-semibold mb-3 pr-12">Unique solutions</h3>
+              <p class="font-sans text-white/60 text-[14px] leading-[18px]">Our learning solutions are custom-built, not templated. We reject outdated curricula to deliver cutting-edge content in Data Science and GenAI, precisely matching industry demands and accelerating every Rebel's career.</p>
+            </article>
+          </div>
+
+          <!-- Tarjeta 2: Vibrant AI Pioneer Ecosystem (gradiente rosa/púrpura) -->
+          <div class="glow-card group relative rounded-2xl p-[2px] transition-all duration-300" data-glow-variant="pink-purple">
+            <div class="glow-effect"><div class="glow-gradient"></div></div>
+            <article class="relative z-10 rounded-[calc(1rem-2px)] bg-black/80 backdrop-blur-md border border-white/5 p-6 min-h-full">
+              <div class="absolute top-5 right-5 w-9 h-9 rounded-full bg-white/5 flex items-center justify-center">
+                <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <h3 class="font-title text-white text-lg font-semibold mb-3 pr-12">Vibrant AI Pioneer Ecosystem</h3>
+              <p class="font-sans text-white/60 text-[14px] leading-[18px]">Adoption doesn't happen in a vacuum. Connect your team with an elite network of practitioners sharing real-world insights, proven adoption frameworks, and peer-to-peer strategies to overcome organizational resistance.</p>
+            </article>
+          </div>
+
+          <!-- Tarjeta 3: Open Dialogue -->
+          <div class="glow-card group relative rounded-2xl p-[2px] transition-all duration-300" data-glow-variant="default">
+            <div class="glow-effect"><div class="glow-gradient"></div></div>
+            <article class="relative z-10 rounded-[calc(1rem-2px)] bg-black/80 backdrop-blur-md border border-white/5 p-6 min-h-full">
+              <div class="absolute top-5 right-5 w-9 h-9 rounded-full bg-white/5 flex items-center justify-center">
+                <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+              </div>
+              <h3 class="font-title text-white text-lg font-semibold mb-3 pr-12">Open Dialogue</h3>
+              <p class="font-sans text-white/60 text-[14px] leading-[18px]">We believe in direct, honest dialogue. We are always ready to discuss specific GenAI scenarios, whether for startups, corporations, or government. Your vision and feedback are key to successful educational implementation.</p>
+            </article>
+          </div>
+
+          <!-- Tarjeta 4: Agile & Frictionless Enablement -->
+          <div class="glow-card group relative rounded-2xl p-[2px] transition-all duration-300" data-glow-variant="default">
+            <div class="glow-effect"><div class="glow-gradient"></div></div>
+            <article class="relative z-10 rounded-[calc(1rem-2px)] bg-black/80 backdrop-blur-md border border-white/5 p-6 min-h-full">
+              <div class="absolute top-5 right-5 w-9 h-9 rounded-full bg-white/5 flex items-center justify-center">
+                <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>
+              </div>
+              <h3 class="font-title text-white text-lg font-semibold mb-3 pr-12">Agile & Frictionless Enablement</h3>
+              <p class="font-sans text-white/60 text-[14px] leading-[18px]">AI moves fast, and so should your team. Our modular, self-paced curriculum is designed to integrate into high-pressure workflows, allowing your organization to master GenAI adoption without disrupting daily business operations.</p>
+            </article>
+          </div>
+
+          <!-- Tarjeta 5: Measurable Outcome-Driven Value -->
+          <div class="glow-card group relative rounded-2xl p-[2px] transition-all duration-300" data-glow-variant="default">
+            <div class="glow-effect"><div class="glow-gradient"></div></div>
+            <article class="relative z-10 rounded-[calc(1rem-2px)] bg-black/80 backdrop-blur-md border border-white/5 p-6 min-h-full">
+              <div class="absolute top-5 right-5 w-9 h-9 rounded-full bg-white/5 flex items-center justify-center">
+                <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+              </div>
+              <h3 class="font-title text-white text-lg font-semibold mb-3 pr-12">Measurable Outcome-Driven Value</h3>
+              <p class="font-sans text-white/60 text-[14px] leading-[18px]">Stop experimenting and start delivering. We focus on high-impact use cases that shift the needle from technical curiosity to tangible business ROI, ensuring every 'Rebel' you enroll translates into streamlined efficiency and data-driven profitability.</p>
+            </article>
+          </div>
+
+          <!-- Tarjeta 6: Scalability -->
+          <div class="glow-card group relative rounded-2xl p-[2px] transition-all duration-300" data-glow-variant="default">
+            <div class="glow-effect"><div class="glow-gradient"></div></div>
+            <article class="relative z-10 rounded-[calc(1rem-2px)] bg-black/80 backdrop-blur-md border border-white/5 p-6 min-h-full">
+              <div class="absolute top-5 right-5 w-9 h-9 rounded-full bg-white/5 flex items-center justify-center">
+                <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 7-8.5 8.5-4-4L2 17"/><path d="m16 7 6 6"/></svg>
+              </div>
+              <h3 class="font-title text-white text-lg font-semibold mb-3 pr-12">Scalability</h3>
+              <p class="font-sans text-white/60 text-[14px] leading-[18px]">We build the fundamental architecture of our Data Science and GenAI curricula with your future needs in mind. This ensures seamless integration of new technologies and makes long-term talent development both efficient and scalable.</p>
+            </article>
+          </div>
+        </div>
+
+        <!-- Botón CTA — azul #1330F4, centrado -->
+        <div class="flex justify-center mt-4">
+          <a href="#contact" class="shiny-cta font-sans inline-flex items-center gap-2 px-12 py-4 rounded-full" style="background-color:#1330F4;color:#fff;">Enroll now! →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Success Stories -->
+    <section id="case-studies" class="relative z-10 py-20 overflow-hidden scroll-mt-20" aria-label="Success Stories">
+      <div class="absolute inset-0 z-0 bg-gradient-to-b from-black/95 via-[#0a0612] to-black/95"></div>
+      <div class="absolute inset-0 z-0 opacity-[0.06]" style="background-image: url('WhatsApp Image 2025-12-18 at 16.33.20-3.jpeg'); background-size: cover; background-position: center right; mask-image: linear-gradient(to right, transparent 30%, black 70%); -webkit-mask-image: linear-gradient(to right, transparent 30%, black 70%);"></div>
+      <div class="relative z-10 max-w-7xl mx-auto px-6 md:px-10 lg:px-8">
+        <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6 lg:gap-8 mb-10 lg:mb-16">
+          <h2 class="font-title text-white font-semibold leading-tight h2-section-desktop" style="font-size:26px;">
+            Read some of the <span style="color:#c4b5fd;">1,000+</span><br>rebel success stories
+          </h2>
+          <div class="flex flex-col gap-4 text-left" style="max-width:520px;">
+            <p class="font-sans text-white/90 leading-relaxed mb-0 hidden lg:block" style="font-size:15px;">
+              Our programs are custom-built, not templated. We build skills on foundational mastery, not temporary trends.
+            </p>
+            <a href="#programs" class="liquid-glass-btn outline-cta inline-flex items-center gap-2 px-6 py-3 rounded-full w-fit hover:bg-[#EA366B]/10 transition-all duration-300">
+              Explore our programs →
+            </a>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-start" id="success-stories-grid">
+          <!-- Arca Continental -->
+          <div class="glow-card group relative rounded-2xl p-[2px] transition-all duration-300 w-full" style="background:rgba(255,255,255,0.10);" data-glow-variant="default">
+            <div class="glow-effect"><div class="glow-gradient"></div></div>
+            <article class="relative z-10 rounded-[calc(1rem-2px)] bg-[#0a0a0b] px-4 py-3 md:p-6 flex flex-col min-h-[300px] md:min-h-[380px]">
+              <div class="flex items-center justify-start h-9 md:h-14 flex-shrink-0 mb-2 md:mb-4">
+                <img src="AC.svg" alt="Arca Continental" class="w-auto max-h-[36px] md:max-h-[56px] object-contain brightness-0 invert opacity-95" />
+              </div>
+              <div style="flex:1;">
+                <h3 class="font-title text-white font-semibold" style="font-size:24px;line-height:26px;letter-spacing:0px;">Challenge</h3>
+                <p class="font-sans text-slate-300 mt-1" style="font-size:14px;line-height:18px;">Scale data literacy and product ownership across a global organization by building specialized tracks for technical and business roles.</p>
+              </div>
+              <div class="mt-auto pt-1.5 md:pt-3 flex flex-col gap-2 md:gap-2.5">
+                <div class="flex flex-wrap gap-1 md:gap-2">
+                  <span class="inline-flex px-2.5 py-1 rounded-full font-sans font-normal text-[12px] leading-[16px] text-white border border-white/20 bg-white/5">Data Literacy</span>
+                  <span class="inline-flex px-2.5 py-1 rounded-full font-sans font-normal text-[12px] leading-[16px] text-white border border-white/20 bg-white/5">Product Ownership</span>
+                </div>
+                <button type="button" class="success-view-results flex items-center gap-2 text-white font-sans font-medium hover:text-white transition-colors w-fit" style="font-size:14px;" data-results-id="results-1">
+                  View results <svg class="chevron-icon w-4 h-4 text-[#EA366B] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <div id="results-1" class="success-results hidden border-t border-white/10 pt-2.5 md:pt-3">
+                  <ul class="space-y-2 md:space-y-3">
+                    <li class="flex items-start gap-2.5 md:gap-3 font-sans font-normal text-[14px] text-white/90 leading-[18px]"><span class="flex-shrink-0 w-[18px] h-[18px] md:w-5 md:h-5 rounded-full bg-emerald-500 flex items-center justify-center mt-0.5"><svg class="w-2.5 h-2.5 md:w-3 md:h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span>Successfully certified 69 students, featuring 42 top-performers across Data Product Owner and Python tracks</span></li>
+                    <li class="flex items-start gap-2.5 md:gap-3 font-sans font-normal text-[14px] text-white/90 leading-[18px]"><span class="flex-shrink-0 w-[18px] h-[18px] md:w-5 md:h-5 rounded-full bg-emerald-500 flex items-center justify-center mt-0.5"><svg class="w-2.5 h-2.5 md:w-3 md:h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span>Developed 34 strategic projects, with 10 elite initiatives selected by experts for their high ROI and potential</span></li>
+                    <li class="flex items-start gap-2.5 md:gap-3 font-sans font-normal text-[14px] text-white/90 leading-[18px]"><span class="flex-shrink-0 w-[18px] h-[18px] md:w-5 md:h-5 rounded-full bg-emerald-500 flex items-center justify-center mt-0.5"><svg class="w-2.5 h-2.5 md:w-3 md:h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span>Achieved a 96% historical CSAT score across 6 intensive certification programs from 2023 to 2025</span></li>
+                  </ul>
+                </div>
+              </div>
+            </article>
+          </div>
+          <!-- Cemex -->
+          <div class="glow-card group relative rounded-2xl p-[2px] transition-all duration-300 w-full" style="background:rgba(255,255,255,0.10);" data-glow-variant="rainbow">
+            <div class="glow-effect"><div class="glow-gradient"></div></div>
+            <article class="relative z-10 rounded-[calc(1rem-2px)] bg-[#0a0a0b] px-4 py-3 md:p-6 flex flex-col min-h-[300px] md:min-h-[380px]">
+              <div class="flex items-center justify-start h-9 md:h-14 flex-shrink-0 mb-2 md:mb-4">
+                <img src="CEMEX.svg" alt="Cemex" class="w-auto max-h-[36px] md:max-h-[56px] object-contain brightness-0 invert opacity-95" />
+              </div>
+              <div style="flex:1;">
+                <h3 class="font-title text-white font-semibold" style="font-size:24px;line-height:26px;letter-spacing:0px;">Challenge</h3>
+                <p class="font-sans text-slate-300 mt-1" style="font-size:14px;line-height:18px;">Improve data discovery time from business users &amp; reduce cost to serve new data requirements</p>
+              </div>
+              <div class="mt-auto pt-1.5 md:pt-3 flex flex-col gap-2 md:gap-2.5">
+                <div class="flex flex-wrap gap-1 md:gap-2">
+                  <span class="inline-flex px-2.5 py-1 rounded-full font-sans font-normal text-[12px] leading-[16px] text-white border border-white/20 bg-white/5">Cost-optimization</span>
+                  <span class="inline-flex px-2.5 py-1 rounded-full font-sans font-normal text-[12px] leading-[16px] text-white border border-white/20 bg-white/5">GenAI expert</span>
+                </div>
+                <button type="button" class="success-view-results flex items-center gap-2 text-white font-sans font-medium hover:text-white transition-colors w-fit" style="font-size:14px;" data-results-id="results-2">
+                  View results <svg class="chevron-icon w-4 h-4 text-[#EA366B] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <div id="results-2" class="success-results hidden border-t border-white/10 pt-2.5 md:pt-3">
+                  <ul class="space-y-2 md:space-y-3">
+                    <li class="flex items-start gap-2.5 md:gap-3 font-sans font-normal text-[14px] text-white/90 leading-[18px]"><span class="flex-shrink-0 w-[18px] h-[18px] md:w-5 md:h-5 rounded-full bg-emerald-500 flex items-center justify-center mt-0.5"><svg class="w-2.5 h-2.5 md:w-3 md:h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span>Reduce 75% FTE time invested in requirements gathering from Data Team</span></li>
+                    <li class="flex items-start gap-2.5 md:gap-3 font-sans font-normal text-[14px] text-white/90 leading-[18px]"><span class="flex-shrink-0 w-[18px] h-[18px] md:w-5 md:h-5 rounded-full bg-emerald-500 flex items-center justify-center mt-0.5"><svg class="w-2.5 h-2.5 md:w-3 md:h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span>Improve business productivity by 20% by recommending existing data products &amp; assets</span></li>
+                    <li class="flex items-start gap-2.5 md:gap-3 font-sans font-normal text-[14px] text-white/90 leading-[18px]"><span class="flex-shrink-0 w-[18px] h-[18px] md:w-5 md:h-5 rounded-full bg-emerald-500 flex items-center justify-center mt-0.5"><svg class="w-2.5 h-2.5 md:w-3 md:h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span>Drive 2x adoption of current data platforms</span></li>
+                  </ul>
+                </div>
+              </div>
+            </article>
+          </div>
+          <!-- Digital Hub MTY -->
+          <div class="glow-card group relative rounded-2xl p-[2px] transition-all duration-300 w-full" style="background:rgba(255,255,255,0.10);" data-glow-variant="rainbow">
+            <div class="glow-effect"><div class="glow-gradient"></div></div>
+            <article class="relative z-10 rounded-[calc(1rem-2px)] bg-[#0a0a0b] px-4 py-3 md:p-6 flex flex-col min-h-[300px] md:min-h-[380px]">
+              <div class="flex items-center justify-start h-9 md:h-14 flex-shrink-0 mb-2 md:mb-4">
+                <img src="MDH.svg" alt="Digital Hub MTY" class="w-auto max-h-[22px] md:max-h-[28px] object-contain brightness-0 invert opacity-95" />
+              </div>
+              <div style="flex:1;">
+                <h3 class="font-title text-white font-semibold" style="font-size:24px;line-height:26px;letter-spacing:0px;">Challenge</h3>
+                <p class="font-sans text-slate-300 mt-1" style="font-size:14px;line-height:18px;">Bridge the talent gap in the local digital economy by training high-performing students through real-world corporate projects and massive GenAI adoption.</p>
+              </div>
+              <div class="mt-auto pt-1.5 md:pt-3 flex flex-col gap-2 md:gap-2.5">
+                <div class="flex flex-wrap gap-1 md:gap-2">
+                  <span class="inline-flex px-2.5 py-1 rounded-full font-sans font-normal text-[12px] leading-[16px] text-white border border-white/20 bg-white/5">Talent Incubator</span>
+                  <span class="inline-flex px-2.5 py-1 rounded-full font-sans font-normal text-[12px] leading-[16px] text-white border border-white/20 bg-white/5">Enterprise ROI</span>
+                </div>
+                <button type="button" class="success-view-results flex items-center gap-2 text-white font-sans font-medium hover:text-white transition-colors w-fit" style="font-size:14px;" data-results-id="results-3">
+                  View results <svg class="chevron-icon w-4 h-4 text-[#EA366B] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <div id="results-3" class="success-results hidden border-t border-white/10 pt-2.5 md:pt-3">
+                  <ul class="space-y-2 md:space-y-3">
+                    <li class="flex items-start gap-2.5 md:gap-3 font-sans font-normal text-[14px] text-white/90 leading-[18px]"><span class="flex-shrink-0 w-[18px] h-[18px] md:w-5 md:h-5 rounded-full bg-emerald-500 flex items-center justify-center mt-0.5"><svg class="w-2.5 h-2.5 md:w-3 md:h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span>Delivered 16 strategic projects, including 9 solving complex corporate challenges with real business data.</span></li>
+                    <li class="flex items-start gap-2.5 md:gap-3 font-sans font-normal text-[14px] text-white/90 leading-[18px]"><span class="flex-shrink-0 w-[18px] h-[18px] md:w-5 md:h-5 rounded-full bg-emerald-500 flex items-center justify-center mt-0.5"><svg class="w-2.5 h-2.5 md:w-3 md:h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span>Maintained an elite 98% satisfaction rate (CSAT) across 3 generations of 100+ participants each</span></li>
+                    <li class="flex items-start gap-2.5 md:gap-3 font-sans font-normal text-[14px] text-white/90 leading-[18px]"><span class="flex-shrink-0 w-[18px] h-[18px] md:w-5 md:h-5 rounded-full bg-emerald-500 flex items-center justify-center mt-0.5"><svg class="w-2.5 h-2.5 md:w-3 md:h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span>Certified 79 top-performing graduates with high-demand skills for immediate professional placement.</span></li>
+                  </ul>
+                </div>
+              </div>
+            </article>
+          </div>
+          <!-- Deacero -->
+          <div class="glow-card group relative rounded-2xl p-[2px] transition-all duration-300 w-full" style="background:rgba(255,255,255,0.10);" data-glow-variant="rainbow">
+            <div class="glow-effect"><div class="glow-gradient"></div></div>
+            <article class="relative z-10 rounded-[calc(1rem-2px)] bg-[#0a0a0b] px-4 py-3 md:p-6 flex flex-col min-h-[300px] md:min-h-[380px]">
+              <div class="flex items-center justify-start h-9 md:h-14 flex-shrink-0 mb-2 md:mb-4">
+                <img src="DEACERO.svg" alt="Deacero" class="w-auto max-h-[36px] md:max-h-[56px] object-contain brightness-0 invert opacity-95" />
+              </div>
+              <div style="flex:1;">
+                <h3 class="font-title text-white font-semibold" style="font-size:24px;line-height:26px;letter-spacing:0px;">Challenge</h3>
+                <p class="font-sans text-slate-300 mt-1" style="font-size:14px;line-height:18px;">Scale GenAI adoption across 200 business users in under 30 days while unlocking the ROI of previously underutilized licenses</p>
+              </div>
+              <div class="mt-auto pt-1.5 md:pt-3 flex flex-col gap-2 md:gap-2.5">
+                <div class="flex flex-wrap gap-1 md:gap-2">
+                  <span class="inline-flex px-2.5 py-1 rounded-full font-sans font-normal text-[12px] leading-[16px] text-white border border-white/20 bg-white/5">Massive Adoption</span>
+                  <span class="inline-flex px-2.5 py-1 rounded-full font-sans font-normal text-[12px] leading-[16px] text-white border border-white/20 bg-white/5">Business Productivity</span>
+                </div>
+                <button type="button" class="success-view-results flex items-center gap-2 text-white font-sans font-medium hover:text-white transition-colors w-fit" style="font-size:14px;" data-results-id="results-4">
+                  View results <svg class="chevron-icon w-4 h-4 text-[#EA366B] transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <div id="results-4" class="success-results hidden border-t border-white/10 pt-2.5 md:pt-3">
+                  <ul class="space-y-2 md:space-y-3">
+                    <li class="flex items-start gap-2.5 md:gap-3 font-sans font-normal text-[14px] text-white/90 leading-[18px]"><span class="flex-shrink-0 w-[18px] h-[18px] md:w-5 md:h-5 rounded-full bg-emerald-500 flex items-center justify-center mt-0.5"><svg class="w-2.5 h-2.5 md:w-3 md:h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span>Achieved 100% CSAT and 65% NPS across a massive group of 200 business leaders.</span></li>
+                    <li class="flex items-start gap-2.5 md:gap-3 font-sans font-normal text-[14px] text-white/90 leading-[18px]"><span class="flex-shrink-0 w-[18px] h-[18px] md:w-5 md:h-5 rounded-full bg-emerald-500 flex items-center justify-center mt-0.5"><svg class="w-2.5 h-2.5 md:w-3 md:h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span>Unstuck GenAI adoption by mapping specific business roles to high-impact productivity tools</span></li>
+                    <li class="flex items-start gap-2.5 md:gap-3 font-sans font-normal text-[14px] text-white/90 leading-[18px]"><span class="flex-shrink-0 w-[18px] h-[18px] md:w-5 md:h-5 rounded-full bg-emerald-500 flex items-center justify-center mt-0.5"><svg class="w-2.5 h-2.5 md:w-3 md:h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span>Graduated 112 top-performing students through a hybrid community program of live and on-demand training</span></li>
+                  </ul>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- The Rebel Curriculum -->
+    <section id="programs" class="relative z-10 py-20 bg-slate-50 scroll-mt-20" aria-label="The Rebel Curriculum">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <!-- Encabezado -->
+        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-6 md:gap-8 mb-12 md:mb-14">
+          <div class="max-w-[760px] md:pr-6">
+            <h2 class="font-title text-slate-900 text-[24px] md:text-[24px] lg:text-[32px] font-semibold leading-[26px] md:leading-[26px] lg:leading-[34px] tracking-normal max-w-md">
+              The Rebel Curriculum:<br>Master your future
+            </h2>
+            <p class="font-sans text-slate-600 text-[14px] leading-[18px] mt-5 text-left max-w-lg">
+              We offer custom-engineered programs designed to close the GenAI talent gap and accelerate your career. Every course is project-based and anchored in real-world industry demands.
+            </p>
+          </div>
+          <div class="md:pt-1 md:shrink-0">
+            <a href="#contact" class="font-sans inline-flex w-full sm:w-auto items-center justify-center gap-2 px-8 py-3 rounded-full border border-blue-600 text-blue-600 font-medium hover:bg-blue-50 transition-colors">
+              Secure your spot now! →
+            </a>
+          </div>
+        </div>
+
+        <!-- Grid de Cursos (4 tarjetas) - interacción tipo DestinationCard -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 overflow-visible">
+          <!-- Tarjeta 1: Data Translator with GenAI -->
+          <a href="#contact" class="curriculum-card" aria-label="Explore Data Translator with GenAI">
+            <div class="curriculum-card__bg" style="background-image: url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=600')"></div>
+            <div class="curriculum-card__overlay-base"></div>
+            <div class="curriculum-card__overlay-gradient"></div>
+            <div class="relative z-20 h-full min-h-[420px] flex flex-col justify-end p-8">
+              <div class="h-[104px] flex flex-col justify-start mb-4">
+                <h3 class="font-title font-semibold text-[24px] leading-[26px] text-white">Data Translator with GenAI</h3>
+              </div>
+              <p class="font-sans text-white/90 text-sm leading-relaxed min-h-[100px] mb-4">Bridge the gap between business and data teams. Learn to translate insights into actionable strategies with GenAI-powered tools.</p>
+              <div class="flex flex-wrap gap-2 mt-auto">
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm text-white/90 text-[11px]">
+                  <svg class="w-3 h-3 flex-shrink-0 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                  8 Weeks
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm text-white/90 text-[11px]">
+                  <svg class="w-3 h-3 flex-shrink-0 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 8-6 4 6 4V8Z"/><rect x="2" y="4" width="14" height="16" rx="2" ry="2"/></svg>
+                  Live Remote
+                </span>
+              </div>
+            </div>
+          </a>
+
+          <!-- Tarjeta 2: Data Product Owner with GenAI -->
+          <a href="#contact" class="curriculum-card" aria-label="Explore Data Product Owner with GenAI">
+            <div class="curriculum-card__bg" style="background-image: url('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600')"></div>
+            <div class="curriculum-card__overlay-base"></div>
+            <div class="curriculum-card__overlay-gradient"></div>
+            <div class="relative z-20 h-full min-h-[420px] flex flex-col justify-end p-8">
+              <div class="h-[104px] flex flex-col justify-start mb-4">
+                <h3 class="font-title font-semibold text-[24px] leading-[26px] text-white">Data Product Owner with GenAI</h3>
+              </div>
+              <p class="font-sans text-white/90 text-sm leading-relaxed min-h-[100px] mb-4">Lead data products from concept to delivery. Master the intersection of product management and GenAI for maximum impact.</p>
+              <div class="flex flex-wrap gap-2 mt-auto">
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm text-white/90 text-[11px]">
+                  <svg class="w-3 h-3 flex-shrink-0 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                  6 Weeks
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm text-white/90 text-[11px]">
+                  <svg class="w-3 h-3 flex-shrink-0 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  On demand
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm text-white/90 text-[11px]">
+                  <svg class="w-3 h-3 flex-shrink-0 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4 8 4v14"/><path d="M9 21V9l6-3 6 3v12"/></svg>
+                  Hybrid
+                </span>
+              </div>
+            </div>
+          </a>
+
+          <!-- Tarjeta 3: Python for Data Analysis with GenAI -->
+          <a href="#contact" class="curriculum-card" aria-label="Explore Python for Data Analysis with GenAI">
+            <div class="curriculum-card__bg" style="background-image: url('https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600')"></div>
+            <div class="curriculum-card__overlay-base"></div>
+            <div class="curriculum-card__overlay-gradient"></div>
+            <div class="relative z-20 h-full min-h-[420px] flex flex-col justify-end p-8">
+              <div class="h-[104px] flex flex-col justify-start mb-4">
+                <h3 class="font-title font-semibold text-[24px] leading-[26px] text-white">Python for Data Analysis with GenAI</h3>
+              </div>
+              <p class="font-sans text-white/90 text-sm leading-relaxed min-h-[100px] mb-4">Unlock the power of Python and AI. Build real-world analytical skills with GenAI augmentation for faster, smarter insights.</p>
+              <div class="flex flex-wrap gap-2 mt-auto">
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm text-white/90 text-[11px]">
+                  <svg class="w-3 h-3 flex-shrink-0 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                  8 Weeks
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm text-white/90 text-[11px]">
+                  <svg class="w-3 h-3 flex-shrink-0 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 8-6 4 6 4V8Z"/><rect x="2" y="4" width="14" height="16" rx="2" ry="2"/></svg>
+                  Live Remote
+                </span>
+              </div>
+            </div>
+          </a>
+
+          <!-- Tarjeta 4: Advanced Data Translator (Level 2) with GenAI -->
+          <a href="#contact" class="curriculum-card" aria-label="Explore Advanced Data Translator with GenAI">
+            <div class="curriculum-card__bg" style="background-image: url('https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=600')"></div>
+            <div class="curriculum-card__overlay-base"></div>
+            <div class="curriculum-card__overlay-gradient"></div>
+            <div class="relative z-20 h-full min-h-[420px] flex flex-col justify-end p-8">
+              <div class="h-[104px] flex flex-col justify-start mb-4">
+                <h3 class="font-title font-semibold text-[24px] leading-[26px] text-white">Advanced Data Translator (Level 2) with GenAI</h3>
+              </div>
+              <p class="font-sans text-white/90 text-sm leading-relaxed min-h-[100px] mb-4">Deepen your expertise. Advanced strategies for enterprise-scale data translation and GenAI-driven decision frameworks.</p>
+              <div class="flex flex-wrap gap-2 mt-auto">
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm text-white/90 text-[11px]">
+                  <svg class="w-3 h-3 flex-shrink-0 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                  18 Weeks
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm text-white/90 text-[11px]">
+                  <svg class="w-3 h-3 flex-shrink-0 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 8-6 4 6 4V8Z"/><rect x="2" y="4" width="14" height="16" rx="2" ry="2"/></svg>
+                  Live Remote
+                </span>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Global Movement (Figma specs: Ambit H2, Inter Medium/Regular) -->
+    <section class="relative z-10 bg-slate-50" aria-label="Global Movement">
+      <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:gap-x-12 lg:gap-x-16 gap-y-10 py-12 px-5 md:px-10 lg:px-8">
+        <!-- Columna Izquierda: 50% ancho -->
+        <div class="w-full md:w-[52%] lg:w-1/2 flex flex-col justify-center">
+          <h2 class="font-title text-slate-900 text-[24px] md:text-[24px] lg:text-[32px] font-semibold leading-[26px] md:leading-[26px] lg:leading-[34px] tracking-normal mb-8">
+            Connect with the global movement closing the talent gap and driving real-world adoption.
+          </h2>
+
+          <div class="flex flex-col space-y-6">
+            <!-- Item 1: Real-Time Global Insights -->
+            <div class="flex gap-4 items-start">
+              <div class="flex-shrink-0 w-10 h-10 bg-[#1330F4] rounded-xl p-2 flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+              </div>
+              <div class="flex flex-col gap-1">
+                <span class="font-sans text-[20px] leading-[24px] font-medium tracking-normal text-slate-900">Real-Time Global Insights</span>
+                <span class="font-sans text-[14px] leading-[18px] font-normal text-slate-500">Stay ahead of the curve with a curated stream of the latest GenAI breakthroughs, tools, and trends from international experts.</span>
+              </div>
+            </div>
+            <!-- Item 2: Cross-Industry Blueprints -->
+            <div class="flex gap-4 items-start">
+              <div class="flex-shrink-0 w-10 h-10 bg-[#1330F4] rounded-xl p-2 flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+              </div>
+              <div class="flex flex-col gap-1">
+                <span class="font-sans text-[20px] leading-[24px] font-medium tracking-normal text-slate-900">Cross-Industry Blueprints</span>
+                <span class="font-sans text-[14px] leading-[18px] font-normal text-slate-500">Discover how peers in CPG, Retail, and Manufacturing are successfully scaling GenAI to solve complex operational challenges.</span>
+              </div>
+            </div>
+            <!-- Item 3: Collaborative Problem Solving -->
+            <div class="flex gap-4 items-start">
+              <div class="flex-shrink-0 w-10 h-10 bg-[#1330F4] rounded-xl p-2 flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <div class="flex flex-col gap-1">
+                <span class="font-sans text-[20px] leading-[24px] font-medium tracking-normal text-slate-900">Collaborative Problem Solving</span>
+                <span class="font-sans text-[14px] leading-[18px] font-normal text-slate-500">Gain direct access to a worldwide network of 10,000+ Rebels for peer-to-peer support, technical guidance, and strategic mentorship.</span>
+              </div>
+            </div>
+            <!-- Item 4: The 100K Movement -->
+            <div class="flex gap-4 items-start">
+              <div class="flex-shrink-0 w-10 h-10 bg-[#1330F4] rounded-xl p-2 flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></svg>
+              </div>
+              <div class="flex flex-col gap-1">
+                <span class="font-sans text-[20px] leading-[24px] font-medium tracking-normal text-slate-900">The 100K Movement</span>
+                <span class="font-sans text-[14px] leading-[18px] font-normal text-slate-500">Be part of the mission to certify 100,000 leaders by 2030, securing your organization's place in the future of the digital economy.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Columna Derecha: Swiper fill (650x650, z-offset 30px, y-offset 15px) -->
+        <div class="w-full md:w-[48%] lg:w-1/2 aspect-square max-h-[700px] overflow-hidden rounded-3xl md:rounded-[40px] bg-slate-100 flex items-center justify-center">
+          <section id="global-movement-swiper" class="image-swiper-stack relative w-full h-full grid place-content-center select-none rounded-3xl md:rounded-[40px] overflow-hidden cursor-grab active:cursor-grabbing"
+            style="--card-perspective: 700px; --card-z-offset: 30px; --card-y-offset: 15px; --card-swap-duration: 300;">
+            <article class="image-card absolute place-self-center border border-slate-400 rounded-xl shadow-md overflow-hidden will-change-transform" data-index="0" style="--i: 1; --swipe-x: 0px; --swipe-rotate: 0deg; z-index: 6; width: 650px; height: 650px; transform: perspective(var(--card-perspective)) translateZ(calc(-1 * var(--card-z-offset) * var(--i))) translateY(calc(var(--card-y-offset) * var(--i))) translateX(var(--swipe-x)) rotateY(var(--swipe-rotate));"><img src="community-global-01.png" alt="Data Rebels community" class="w-full h-full object-cover select-none pointer-events-none" draggable="false" /></article>
+            <article class="image-card absolute place-self-center border border-slate-400 rounded-xl shadow-md overflow-hidden will-change-transform" data-index="1" style="--i: 2; --swipe-x: 0px; --swipe-rotate: 0deg; z-index: 5; width: 650px; height: 650px; transform: perspective(var(--card-perspective)) translateZ(calc(-1 * var(--card-z-offset) * var(--i))) translateY(calc(var(--card-y-offset) * var(--i))) translateX(var(--swipe-x)) rotateY(var(--swipe-rotate));"><img src="community-global-02.png" alt="Data Rebels community" class="w-full h-full object-cover select-none pointer-events-none" draggable="false" /></article>
+            <article class="image-card absolute place-self-center border border-slate-400 rounded-xl shadow-md overflow-hidden will-change-transform" data-index="2" style="--i: 3; --swipe-x: 0px; --swipe-rotate: 0deg; z-index: 4; width: 650px; height: 650px; transform: perspective(var(--card-perspective)) translateZ(calc(-1 * var(--card-z-offset) * var(--i))) translateY(calc(var(--card-y-offset) * var(--i))) translateX(var(--swipe-x)) rotateY(var(--swipe-rotate));"><img src="community-global-03.png" alt="Data Rebels community" class="w-full h-full object-cover select-none pointer-events-none" draggable="false" /></article>
+            <article class="image-card absolute place-self-center border border-slate-400 rounded-xl shadow-md overflow-hidden will-change-transform" data-index="3" style="--i: 4; --swipe-x: 0px; --swipe-rotate: 0deg; z-index: 3; width: 650px; height: 650px; transform: perspective(var(--card-perspective)) translateZ(calc(-1 * var(--card-z-offset) * var(--i))) translateY(calc(var(--card-y-offset) * var(--i))) translateX(var(--swipe-x)) rotateY(var(--swipe-rotate));"><img src="community-global-04.png" alt="Data Rebels community" class="w-full h-full object-cover select-none pointer-events-none" draggable="false" /></article>
+            <article class="image-card absolute place-self-center border border-slate-400 rounded-xl shadow-md overflow-hidden will-change-transform" data-index="4" style="--i: 5; --swipe-x: 0px; --swipe-rotate: 0deg; z-index: 2; width: 650px; height: 650px; transform: perspective(var(--card-perspective)) translateZ(calc(-1 * var(--card-z-offset) * var(--i))) translateY(calc(var(--card-y-offset) * var(--i))) translateX(var(--swipe-x)) rotateY(var(--swipe-rotate));"><img src="community-global-05.png" alt="Data Rebels community" class="w-full h-full object-cover select-none pointer-events-none" draggable="false" /></article>
+            <article class="image-card absolute place-self-center border border-slate-400 rounded-xl shadow-md overflow-hidden will-change-transform" data-index="5" style="--i: 6; --swipe-x: 0px; --swipe-rotate: 0deg; z-index: 1; width: 650px; height: 650px; transform: perspective(var(--card-perspective)) translateZ(calc(-1 * var(--card-z-offset) * var(--i))) translateY(calc(var(--card-y-offset) * var(--i))) translateX(var(--swipe-x)) rotateY(var(--swipe-rotate));"><img src="community-global-06.png" alt="Data Rebels community" class="w-full h-full object-cover select-none pointer-events-none" draggable="false" /></article>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <!-- Lessons from Business Leaders (Beyond Data) - id="podcast" -->
+    <section id="podcast" class="relative z-10 py-20 overflow-hidden" aria-label="Lessons from Business Leaders - Beyond Data">
+      <!-- Fondo: degradado púrpura vibrante -->
+      <div class="absolute inset-0 z-0" style="background: linear-gradient(135deg, #7c3aed 0%, #a855f7 30%, #6366f1 60%, #8b5cf6 100%);"></div>
+      <div class="absolute inset-0 z-0 opacity-30" style="background-image: url('Background podcast.png'); background-size: cover; background-position: center;"></div>
+      <div class="relative z-10 max-w-7xl mx-auto px-6 md:px-10 lg:px-8">
+        <div class="bg-white rounded-[24px] md:rounded-[28px] p-6 md:p-8 lg:p-10 border border-violet-200/70 shadow-[0_0_0_1px_rgba(168,85,247,0.14),0_20px_50px_rgba(124,58,237,0.15)]">
+          <!-- Encabezado -->
+          <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-5 md:gap-8 mb-8 md:mb-10">
+            <div class="order-2 md:order-1 max-w-2xl">
+              <h2 class="font-title text-slate-900 text-[24px] md:text-[24px] lg:text-[32px] font-semibold leading-[26px] lg:leading-[34px] tracking-normal mb-4 text-left">
+                Lessons from Business Leaders Implementing Data & IA Strategies
+              </h2>
+              <p class="font-sans text-slate-500 text-[14px] md:text-[16px] leading-[20px] md:leading-[24px] text-left">
+                Go behind the scenes with global leaders as they share the raw blueprints for successful Data & AI implementation.
+                <span class="text-violet-500 font-medium">No fluff—just real-world strategies</span>
+                from the people moving the needle.
+              </p>
+            </div>
+            <div class="order-1 md:order-2 flex-shrink-0 md:self-start">
+              <img src="BeyonData.svg" alt="BEYOND DATA" class="h-11 md:h-14 w-auto object-contain" />
+            </div>
+          </div>
+
+          <!-- Carrusel de episodios (3 visibles por página, desliza lateralmente) -->
+          <div class="w-full overflow-hidden mb-10" id="podcast-carousel">
+            <div class="flex flex-row flex-nowrap transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]" id="podcast-track">
+              <!-- Página 0 -->
+              <div class="podcast-page w-full shrink-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <article class="podcast-card group border border-slate-200/70 rounded-2xl overflow-hidden bg-white flex flex-col"><a href="https://www.youtube.com/watch?v=nPxZAuwX6Ns" target="_blank" rel="noopener noreferrer" class="flex flex-col flex-1"><div class="podcast-thumb relative h-52 overflow-hidden"><div class="podcast-thumb-pattern absolute inset-0"></div><div class="podcast-card-img-wrap absolute inset-0 origin-center"><img src="Podcast1.avif" alt="Christopher Paquette" class="absolute inset-0 w-full h-full object-cover object-center" onerror="this.style.display='none'"/></div></div><div class="p-5 flex-1 flex flex-col"><p class="font-sans font-semibold mb-1" style="font-size:12px;line-height:16px;color:#64748b">23 JUL, 2025</p><h3 class="font-sans text-slate-900 font-medium mb-1" style="font-size:20px;line-height:24px">Christopher Paquette</h3><p class="font-sans text-slate-500 text-sm mb-4 flex-1">Chief Digital & Transformation Officer</p><span class="font-sans inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-white text-sm font-medium w-fit" style="background-color:#1330F4"><svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>Watch full episode</span></div></a></article>
+                <article class="podcast-card group border border-slate-200/70 rounded-2xl overflow-hidden bg-white flex flex-col"><a href="https://www.youtube.com/watch?v=RJOcFuX4oIs" target="_blank" rel="noopener noreferrer" class="flex flex-col flex-1"><div class="podcast-thumb relative h-52 overflow-hidden"><div class="podcast-thumb-pattern absolute inset-0"></div><div class="podcast-card-img-wrap absolute inset-0 origin-center"><img src="Podcast2.avif" alt="Koro Castellano" class="absolute inset-0 w-full h-full object-cover object-center" onerror="this.style.display='none'"/></div></div><div class="p-5 flex-1 flex flex-col"><p class="font-sans font-semibold mb-1" style="font-size:12px;line-height:16px;color:#64748b">12 MAY, 2025</p><h3 class="font-sans text-slate-900 font-medium mb-1" style="font-size:20px;line-height:24px">Koro Castellano</h3><p class="font-sans text-slate-500 text-sm mb-4 flex-1">Independent Advisor and Strategic Consultant</p><span class="font-sans inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-white text-sm font-medium w-fit" style="background-color:#1330F4"><svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>Watch full episode</span></div></a></article>
+                <article class="podcast-card group border border-slate-200/70 rounded-2xl overflow-hidden bg-white flex flex-col"><a href="https://youtu.be/Dflk3lKTKxI?si=olbEgV0NJA1_KWGf" target="_blank" rel="noopener noreferrer" class="flex flex-col flex-1"><div class="podcast-thumb relative h-52 overflow-hidden"><div class="podcast-thumb-pattern absolute inset-0"></div><div class="podcast-card-img-wrap absolute inset-0 origin-center"><img src="Podcast3.avif" alt="Mariano Hansen" class="absolute inset-0 w-full h-full object-cover object-center" onerror="this.style.display='none'"/></div></div><div class="p-5 flex-1 flex flex-col"><p class="font-sans font-semibold mb-1" style="font-size:12px;line-height:16px;color:#64748b">04 APR, 2025</p><h3 class="font-sans text-slate-900 font-medium mb-1" style="font-size:20px;line-height:24px">Mariano Hansen</h3><p class="font-sans text-slate-500 text-sm mb-4 flex-1">Chief Strategy Officer en PSG</p><span class="font-sans inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-white text-sm font-medium w-fit" style="background-color:#1330F4"><svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>Watch full episode</span></div></a></article>
+              </div>
+              <!-- Página 1 -->
+              <div class="podcast-page w-full shrink-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <article class="podcast-card group border border-slate-200/70 rounded-2xl overflow-hidden bg-white flex flex-col"><a href="https://youtu.be/_QNofyYmct8?si=yLBrXDvyExLJgh9Y" target="_blank" rel="noopener noreferrer" class="flex flex-col flex-1"><div class="podcast-thumb relative h-52 overflow-hidden"><div class="podcast-thumb-pattern absolute inset-0"></div><div class="podcast-card-img-wrap absolute inset-0 origin-center"><img src="Podcast4.avif" alt="José Chapa" class="absolute inset-0 w-full h-full object-cover object-center" onerror="this.style.display='none'"/></div></div><div class="p-5 flex-1 flex flex-col"><p class="font-sans font-semibold mb-1" style="font-size:12px;line-height:16px;color:#64748b">23 JUL, 2025</p><h3 class="font-sans text-slate-900 font-medium mb-1" style="font-size:20px;line-height:24px">José Chapa</h3><p class="font-sans text-slate-500 text-sm mb-4 flex-1">VP Product Management en Walmart</p><span class="font-sans inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-white text-sm font-medium w-fit" style="background-color:#1330F4"><svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>Watch full episode</span></div></a></article>
+                <article class="podcast-card group border border-slate-200/70 rounded-2xl overflow-hidden bg-white flex flex-col"><a href="https://youtu.be/aWOWs1UWSqU?si=-K8ZLlTqrBxShfOk" target="_blank" rel="noopener noreferrer" class="flex flex-col flex-1"><div class="podcast-thumb relative h-52 overflow-hidden"><div class="podcast-thumb-pattern absolute inset-0"></div><div class="podcast-card-img-wrap absolute inset-0 origin-center"><img src="Podcast5.avif" alt="Sebastián Caro" class="absolute inset-0 w-full h-full object-cover object-center" onerror="this.style.display='none'"/></div></div><div class="p-5 flex-1 flex flex-col"><p class="font-sans font-semibold mb-1" style="font-size:12px;line-height:16px;color:#64748b">12 MAY, 2025</p><h3 class="font-sans text-slate-900 font-medium mb-1" style="font-size:20px;line-height:24px">Sebastián Caro</h3><p class="font-sans text-slate-500 text-sm mb-4 flex-1">CEO de Hunty</p><span class="font-sans inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-white text-sm font-medium w-fit" style="background-color:#1330F4"><svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>Watch full episode</span></div></a></article>
+                <article class="podcast-card group border border-slate-200/70 rounded-2xl overflow-hidden bg-white flex flex-col"><a href="https://youtu.be/vcw3HsBpuhI?si=azAFa02xE_eT8wxR" target="_blank" rel="noopener noreferrer" class="flex flex-col flex-1"><div class="podcast-thumb relative h-52 overflow-hidden"><div class="podcast-thumb-pattern absolute inset-0"></div><div class="podcast-card-img-wrap absolute inset-0 origin-center"><img src="Podcast6.png" alt="Patricio Gil" class="absolute inset-0 w-full h-full object-cover object-center" onerror="this.style.display='none'"/></div></div><div class="p-5 flex-1 flex flex-col"><p class="font-sans font-semibold mb-1" style="font-size:12px;line-height:16px;color:#64748b">04 APR, 2025</p><h3 class="font-sans text-slate-900 font-medium mb-1" style="font-size:20px;line-height:24px">Patricio Gil</h3><p class="font-sans text-slate-500 text-sm mb-4 flex-1">Director de Estrategia de Consumidor y Analitica de Oxxo</p><span class="font-sans inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-white text-sm font-medium w-fit" style="background-color:#1330F4"><svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>Watch full episode</span></div></a></article>
+              </div>
+              <!-- Páginas 2 y 3 (placeholders) -->
+              <div class="podcast-page w-full shrink-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"><article class="podcast-card group border border-slate-200/70 rounded-2xl overflow-hidden bg-white flex flex-col"><a href="https://youtu.be/gZbvuMpjI_M?si=juWDJeHxsxAYeYrE" target="_blank" rel="noopener noreferrer" class="flex flex-col flex-1"><div class="podcast-thumb relative h-52 overflow-hidden"><div class="podcast-thumb-pattern absolute inset-0"></div><div class="podcast-card-img-wrap absolute inset-0 origin-center"><img src="Podcast7.png" alt="Enrico Robles" class="absolute inset-0 w-full h-full object-cover object-center" onerror="this.style.display='none'"/></div></div><div class="p-5 flex-1 flex flex-col"><p class="font-sans font-semibold mb-1" style="font-size:12px;line-height:16px;color:#64748b">18 MAR, 2025</p><h3 class="font-sans text-slate-900 font-medium mb-1" style="font-size:20px;line-height:24px">Enrico Robles</h3><p class="font-sans text-slate-500 text-sm mb-4 flex-1">Director of Data Analytics & Platform en Endeavor</p><span class="font-sans inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-white text-sm font-medium w-fit" style="background-color:#1330F4"><svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>Watch full episode</span></div></a></article><article class="podcast-card group border border-slate-200/70 rounded-2xl overflow-hidden bg-white flex flex-col"><a href="https://youtu.be/o4A26hzyyrs?si=Tw3ziTr8PXTggJgW" target="_blank" rel="noopener noreferrer" class="flex flex-col flex-1"><div class="podcast-thumb relative h-52 overflow-hidden"><div class="podcast-thumb-pattern absolute inset-0"></div><div class="podcast-card-img-wrap absolute inset-0 origin-center"><img src="Podcast8.png" alt="Eduardo de la Garza" class="absolute inset-0 w-full h-full object-cover object-center" onerror="this.style.display='none'"/></div></div><div class="p-5 flex-1 flex flex-col"><p class="font-sans font-semibold mb-1" style="font-size:12px;line-height:16px;color:#64748b">27 FEB, 2025</p><h3 class="font-sans text-slate-900 font-medium mb-1" style="font-size:20px;line-height:24px">Eduardo de la Garza</h3><p class="font-sans text-slate-500 text-sm mb-4 flex-1">Por Talento Ganas o por Talento Pierdes</p><span class="font-sans inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-white text-sm font-medium w-fit" style="background-color:#1330F4"><svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>Watch full episode</span></div></a></article><article class="podcast-card group border border-slate-200/70 rounded-2xl overflow-hidden bg-white flex flex-col"><a href="https://youtu.be/zEPY40fmIfU?si=Ib4ordqyvXnBkjqP" target="_blank" rel="noopener noreferrer" class="flex flex-col flex-1"><div class="podcast-thumb relative h-52 overflow-hidden"><div class="podcast-thumb-pattern absolute inset-0"></div><div class="podcast-card-img-wrap absolute inset-0 origin-center"><img src="Podcast9.png" alt="Alberto de Armas" class="absolute inset-0 w-full h-full object-cover object-center" onerror="this.style.display='none'"/></div></div><div class="p-5 flex-1 flex flex-col"><p class="font-sans font-semibold mb-1" style="font-size:12px;line-height:16px;color:#64748b">15 FEB, 2025</p><h3 class="font-sans text-slate-900 font-medium mb-1" style="font-size:20px;line-height:24px">Alberto de Armas</h3><p class="font-sans text-slate-500 text-sm mb-4 flex-1">HR Powered AI</p><span class="font-sans inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-white text-sm font-medium w-fit" style="background-color:#1330F4"><svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>Watch full episode</span></div></a></article></div>
+              <div class="podcast-page w-full shrink-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"><article class="podcast-card group border border-slate-200/70 rounded-2xl overflow-hidden bg-white flex flex-col"><a href="https://youtu.be/SgEVj-6g41k?si=JWAMWiDzG-r1MQvS" target="_blank" rel="noopener noreferrer" class="flex flex-col flex-1"><div class="podcast-thumb relative h-52 overflow-hidden"><div class="podcast-thumb-pattern absolute inset-0"></div><div class="podcast-card-img-wrap absolute inset-0 origin-center"><img src="Podcast10.png" alt="Karim Touma" class="absolute inset-0 w-full h-full object-cover object-center" onerror="this.style.display='none'"/></div></div><div class="p-5 flex-1 flex flex-col"><p class="font-sans font-semibold mb-1" style="font-size:12px;line-height:16px;color:#64748b">09 FEB, 2025</p><h3 class="font-sans text-slate-900 font-medium mb-1" style="font-size:20px;line-height:24px">Karim Touma</h3><p class="font-sans text-slate-500 text-sm mb-4 flex-1">Data & AI como capacidad de negocios</p><span class="font-sans inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-white text-sm font-medium w-fit" style="background-color:#1330F4"><svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>Watch full episode</span></div></a></article><article class="podcast-card group border border-slate-200/70 rounded-2xl overflow-hidden bg-white flex flex-col"><a href="https://youtu.be/w-dBaJPByKE?si=aElOIXtf5ztnE5S7" target="_blank" rel="noopener noreferrer" class="flex flex-col flex-1"><div class="podcast-thumb relative h-52 overflow-hidden"><div class="podcast-thumb-pattern absolute inset-0"></div><div class="podcast-card-img-wrap absolute inset-0 origin-center"><img src="Podcast11.png" alt="David Puente" class="absolute inset-0 w-full h-full object-cover object-center" onerror="this.style.display='none'"/></div></div><div class="p-5 flex-1 flex flex-col"><p class="font-sans font-semibold mb-1" style="font-size:12px;line-height:16px;color:#64748b">20 JAN, 2025</p><h3 class="font-sans text-slate-900 font-medium mb-1" style="font-size:20px;line-height:24px">David Puente</h3><p class="font-sans text-slate-500 text-sm mb-4 flex-1">De AI a ROI: Modelos de captura de valor</p><span class="font-sans inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-white text-sm font-medium w-fit" style="background-color:#1330F4"><svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>Watch full episode</span></div></a></article><article class="podcast-card group border border-slate-200/70 rounded-2xl overflow-hidden bg-white flex flex-col shadow-md"><a href="https://www.youtube.com/@BeyondDatabyDR/videos" target="_blank" rel="noopener noreferrer" class="flex flex-col flex-1 items-center justify-center p-8 text-center min-h-[340px]"><svg width="86" height="86" viewBox="0 0 86 86" fill="none" xmlns="http://www.w3.org/2000/svg" class="mb-4 flex-shrink-0" aria-label="BEYOND DATA"><circle cx="42.5188" cy="42.5188" r="40.5188" fill="white" stroke="#2179FF" stroke-width="4"/><path class="beyond-data-bar" d="M22.2394 59.4879C19.3497 59.4879 17.0073 57.1417 17.0073 54.2475V38.1227C17.0073 35.2285 19.3497 32.8823 22.2394 32.8823C25.1291 32.8823 27.4718 35.2285 27.4718 38.1227V54.2475C27.4718 57.1417 25.1291 59.4879 22.2394 59.4879Z" fill="#2179FF"/><path class="beyond-data-bar" d="M35.3605 63.6806C32.4708 63.6806 30.1284 61.3344 30.1284 58.4401V28.1257C30.1284 25.2317 32.4708 22.8853 35.3605 22.8853C38.2501 22.8853 40.5926 25.2317 40.5926 28.1257V58.4401C40.5926 61.3344 38.2501 63.6806 35.3605 63.6806Z" fill="#2179FF"/><path class="beyond-data-bar" d="M48.4816 68.1953C45.5919 68.1953 43.2495 65.8491 43.2495 62.9549V20.5471C43.2495 17.6528 45.5919 15.3066 48.4816 15.3066C51.3712 15.3066 53.7137 17.6528 53.7137 20.5471V62.9549C53.7137 65.8491 51.3712 68.1953 48.4816 68.1953Z" fill="#2179FF"/><path class="beyond-data-bar" d="M61.5214 54.005C58.6318 54.005 56.2891 51.6589 56.2891 48.7646V26.8351C56.2891 23.9409 58.6318 21.5947 61.5214 21.5947C64.4108 21.5947 66.7535 23.9409 66.7535 26.8351V48.7646C66.7535 51.6589 64.4108 54.005 61.5214 54.005Z" fill="#2179FF"/></svg><p class="font-sans text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">BEYOND DATA</p><h3 class="font-title text-slate-900 text-xl font-semibold mb-3">Beyond the hype.</h3><p class="font-sans text-slate-500 text-sm mb-6 max-w-[260px]">Unfiltered conversations with the leaders driving real-world GenAI adoption.</p><span class="font-sans inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-white text-sm font-medium w-fit transition-opacity group-hover:opacity-90" style="background-color:#1330F4"><svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>Listen to all episodes</span></a></article></div>
+            </div>
+          </div>
+
+          <!-- Navegación Footer: dots (izq) + flechas (der) según Figma -->
+          <div class="flex items-center justify-between pt-5 mt-6">
+            <div class="flex items-center gap-1.5" role="tablist" aria-label="Paginación de episodios">
+              <button type="button" class="w-2.5 h-2.5 rounded-full shrink-0 transition-all border-none bg-slate-200" data-dot="0" title="Página 1"></button>
+              <button type="button" class="w-2.5 h-2.5 rounded-full shrink-0 transition-all border-none bg-slate-200" data-dot="1" title="Página 2"></button>
+              <button type="button" class="w-2.5 h-2.5 rounded-full shrink-0 transition-all border-none bg-slate-200" data-dot="2" title="Página 3"></button>
+              <button type="button" class="w-2.5 h-2.5 rounded-full shrink-0 transition-all border-none bg-slate-200" data-dot="3" title="Página 4"></button>
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" class="podcast-nav-btn" aria-label="Anterior" id="podcast-prev" disabled>
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+              </button>
+              <button type="button" class="podcast-nav-btn" aria-label="Siguiente" id="podcast-next">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Frequently asked questions -->
+    <section class="bg-white py-20 lg:py-24 w-full" aria-label="Frequently asked questions">
+      <div class="max-w-7xl mx-auto px-5 md:px-8 lg:px-10 xl:px-12">
+        <div class="flex flex-col gap-10">
+          <!-- Columna izquierda: Info -->
+          <div class="w-full">
+            <h2 class="font-title text-slate-900 text-[24px] leading-[26px] font-semibold tracking-normal mb-4">Frequently asked questions and answers</h2>
+            <p class="font-sans text-slate-500 text-[14px] leading-[18px] mb-6 md:mb-8 max-w-2xl">Find answers to frequently asked questions about our GenAI &amp; Education solutions and how Data Rebels can address your specific business needs.</p>
+            <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+              <a href="#contact" class="shiny-cta font-sans inline-flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 whitespace-nowrap shrink-0">Enroll a Rebel Today <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+              <a href="#chat" class="font-sans inline-flex w-full sm:w-auto items-center justify-center sm:justify-start gap-2 text-blue-600 font-semibold hover:opacity-80 transition-opacity whitespace-nowrap shrink-0">
+                <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Chat with a Rebel Expert
+              </a>
+            </div>
+          </div>
+          <!-- Columna derecha: Acordeón -->
+          <div class="w-full min-w-0">
+            <div class="faq-accordion">
+              <div class="faq-item border-b border-slate-200" data-faq-id="q1">
+                <button type="button" class="faq-trigger w-full flex items-center justify-between gap-4 py-5 text-left cursor-pointer group" aria-expanded="false" aria-controls="faq-answer-q1" id="faq-question-q1">
+                  <span class="font-title text-slate-800 text-[20px] leading-[24px] font-semibold tracking-normal flex-1 pr-4">What is Data Rebels?</span>
+                  <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full transition-colors group-hover:bg-blue-50 text-blue-600"><svg class="faq-icon-plus w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><svg class="faq-icon-minus w-5 h-5 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+                </button>
+                <div class="faq-answer-wrap" aria-hidden="true" id="faq-answer-q1" role="region" aria-labelledby="faq-question-q1">
+                  <div class="faq-answer-inner pb-5 pl-0 pr-12"><p class="font-sans text-slate-500 text-[14px] leading-[18px]">Data Rebels is an elite educational ecosystem dedicated to closing the GenAI talent gap. We empower business leaders and technical teams through project-based learning and anchored industry demands, moving beyond theory to drive real-world adoption and strategic ROI.</p></div>
+                </div>
+              </div>
+              <div class="faq-item border-b border-slate-200" data-faq-id="q2">
+                <button type="button" class="faq-trigger w-full flex items-center justify-between gap-4 py-5 text-left cursor-pointer group" aria-expanded="true" aria-controls="faq-answer-q2" id="faq-question-q2">
+                  <span class="font-title text-slate-800 text-[20px] leading-[24px] font-semibold tracking-normal flex-1 pr-4">Is GenAI easy to use?</span>
+                  <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full transition-colors group-hover:bg-blue-50 text-blue-600"><svg class="faq-icon-plus w-5 h-5 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><svg class="faq-icon-minus w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+                </button>
+                <div class="faq-answer-wrap" aria-hidden="false" id="faq-answer-q2" role="region" aria-labelledby="faq-question-q2">
+                  <div class="faq-answer-inner pb-5 pl-0 pr-12"><p class="font-sans text-slate-500 text-[14px] leading-[18px]">Absolutely! GenAI is designed with user-friendliness in mind. Our Artificial Intelligence curriculum is easy to navigate, and we provide clear instructions, hands-on frameworks, and helpful resources to ensure a smooth learning curve for every professional.</p></div>
+                </div>
+              </div>
+              <div class="faq-item border-b border-slate-200" data-faq-id="q3">
+                <button type="button" class="faq-trigger w-full flex items-center justify-between gap-4 py-5 text-left cursor-pointer group" aria-expanded="false" aria-controls="faq-answer-q3" id="faq-question-q3">
+                  <span class="font-title text-slate-800 text-[20px] leading-[24px] font-semibold tracking-normal flex-1 pr-4">What Plans does Data Rebels offer?</span>
+                  <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full transition-colors group-hover:bg-blue-50 text-blue-600"><svg class="faq-icon-plus w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><svg class="faq-icon-minus w-5 h-5 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+                </button>
+                <div class="faq-answer-wrap" aria-hidden="true" id="faq-answer-q3" role="region" aria-labelledby="faq-question-q3">
+                  <div class="faq-answer-inner pb-5 pl-0 pr-12"><p class="font-sans text-slate-500 text-[14px] leading-[18px]">We offer custom-engineered programs tailored to different expertise levels. This includes our 'Rebel Curriculum' for individual professionals (from Data Translators to Python specialists) and specialized corporate solutions designed to address specific business needs and accelerate organizational GenAI maturity.</p></div>
+                </div>
+              </div>
+              <div class="faq-item border-b border-slate-200 last:border-b-0" data-faq-id="q4">
+                <button type="button" class="faq-trigger w-full flex items-center justify-between gap-4 py-5 text-left cursor-pointer group" aria-expanded="false" aria-controls="faq-answer-q4" id="faq-question-q4">
+                  <span class="font-title text-slate-800 text-[20px] leading-[24px] font-semibold tracking-normal flex-1 pr-4">How can I get started?</span>
+                  <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full transition-colors group-hover:bg-blue-50 text-blue-600"><svg class="faq-icon-plus w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><svg class="faq-icon-minus w-5 h-5 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+                </button>
+                <div class="faq-answer-wrap" aria-hidden="true" id="faq-answer-q4" role="region" aria-labelledby="faq-question-q4">
+                  <div class="faq-answer-inner pb-5 pl-0 pr-12"><p class="font-sans text-slate-500 text-[14px] leading-[18px]">Getting started is simple. You can explore our Rebel Curriculum and enroll in a course today to secure your spot. If you have specific questions or need a tailored plan for your team, click 'Chat with a Rebel Expert' to get personalized guidance from our strategy team.</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact" class="relative w-full py-12 lg:py-16 flex items-center justify-center bg-cover bg-center bg-no-repeat" style="background-image: url('Background-form.png');" aria-label="Contact">
+      <div class="max-w-6xl mx-auto w-full px-6 md:px-10 lg:px-8">
+        <div class="bg-white rounded-[3rem] p-6 sm:p-10 md:p-8 lg:p-16 shadow-2xl">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-y-12 lg:gap-16">
+            <!-- Columna Izquierda - Información -->
+            <div class="flex flex-col">
+              <div class="mb-8">
+                <img src="Isologo.svg" alt="Data Rebels" width="48" height="40" class="object-contain" />
+              </div>
+              <h2 class="font-title text-slate-900 text-[24px] leading-[26px] lg:text-[36px] lg:leading-tight font-semibold tracking-normal mb-6">Contact with us</h2>
+              <p class="font-sans text-slate-600 text-[14px] leading-[18px] mb-8 lg:mb-10 max-w-md">Have questions or need assistance? Our dedicated team is here to support you—just reach out!</p>
+              <div class="hidden lg:block space-y-6">
+                <a href="tel:8182626300" class="flex items-center gap-3 font-sans text-slate-700 text-[15px] hover:text-slate-900 transition-colors">
+                  <svg class="w-5 h-5 flex-shrink-0 text-rose-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  <span>81 8262 6300</span>
+                </a>
+                <a href="mailto:contact@datarebels.mx" class="flex items-center gap-3 font-sans text-slate-700 text-[15px] hover:text-slate-900 transition-colors">
+                  <svg class="w-5 h-5 flex-shrink-0 text-rose-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                  <span>contact@datarebels.mx</span>
+                </a>
+                <div class="flex items-start gap-3 font-sans text-slate-700 text-[15px]">
+                  <svg class="w-5 h-5 flex-shrink-0 mt-0.5 text-rose-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                  <span>Blvd. Díaz Ordaz 333, SPGG, N.L.</span>
+                </div>
+              </div>
+            </div>
+            <!-- Columna Derecha - Formulario HubSpot -->
+            <div class="flex flex-col relative min-h-[320px]">
+              <div id="hubspot-contact-form" class="hubspot-form-wrapper w-full"></div>
+            </div>
+            <!-- Mobile/Tablet: datos de contacto debajo del formulario -->
+            <div class="lg:hidden space-y-4 -mt-2">
+              <a href="tel:8182626300" class="flex items-center gap-3 font-sans text-slate-700 text-[15px] hover:text-slate-900 transition-colors">
+                <svg class="w-4 h-4 flex-shrink-0 text-rose-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                <span>81 8262 6300</span>
+              </a>
+              <a href="mailto:contact@datarebels.mx" class="flex items-center gap-3 font-sans text-slate-700 text-[15px] hover:text-slate-900 transition-colors break-all">
+                <svg class="w-4 h-4 flex-shrink-0 text-rose-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                <span>contact@datarebels.mx</span>
+              </a>
+              <div class="flex items-start gap-3 font-sans text-slate-700 text-[15px]">
+                <svg class="w-4 h-4 flex-shrink-0 mt-0.5 text-rose-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span>Blvd. Díaz Ordaz 333, SPGG, N.L.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-black flex-shrink-0 relative z-20">
+    <div class="max-w-7xl mx-auto px-6 py-12 lg:py-16">
+      <!-- Nivel Superior: Logo izquierda | Slogan + Acciones derecha -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
+        <div class="flex-shrink-0">
+          <a href="#" class="inline-block">
+            <img src="Logo-white.svg" alt="datarebels" class="h-6 w-auto" />
+          </a>
+        </div>
+        <div class="flex flex-col gap-6 max-w-[500px]">
+          <p class="font-sans font-medium text-white text-[20px] leading-[24px] tracking-normal">
+            Closing the GenAI talent gap in Mexico with 100,000 certified Rebels by 2030. <span class="inline-block align-middle">⚡</span>
+          </p>
+          <div class="flex flex-wrap items-center gap-6">
+            <a href="#contact" class="shiny-cta font-sans inline-flex items-center justify-center px-8 py-3 rounded-full whitespace-nowrap">Enroll a Rebel Today</a>
+            <div class="flex items-center gap-4">
+              <span class="font-sans text-white text-sm">Visit us at</span>
+              <div class="flex gap-2">
+                <a href="https://www.linkedin.com/company/datarebelsmx/?originalSubdomain=mx" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-lg flex items-center justify-center bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors" aria-label="LinkedIn">
+                  <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>
+                </a>
+                <a href="https://www.instagram.com/datarebels.mx/" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-lg flex items-center justify-center bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors" aria-label="Instagram">
+                  <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8A4 4 0 0 1 16 11.37zm1.5-4.87h.01"/></svg>
+                </a>
+                <a href="https://x.com/Eduardo_dlgs" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-lg flex items-center justify-center bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors" aria-label="X (Twitter)">
+                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Barra Inferior: Copyright y legal -->
+      <div class="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <p class="font-sans text-[12px] uppercase tracking-widest text-gray-400">©2026 DATA REBELS. ALL RIGHTS RESERVED</p>
+        <div class="flex flex-wrap gap-6">
+          <a href="#terms" class="font-sans text-[12px] uppercase tracking-widest text-gray-400 hover:text-white transition-colors">TERMS OF USE</a>
+          <a href="#privacy" class="font-sans text-[12px] uppercase tracking-widest text-gray-400 hover:text-white transition-colors">PRIVACY POLICY</a>
+          <a href="#security" class="font-sans text-[12px] uppercase tracking-widest text-gray-400 hover:text-white transition-colors">SECURITY</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function() {
+      var GRADIENT = {
+        default: 'transparent 0%, rgba(34,197,94,0.4) 15%, rgba(234,179,8,0.45) 30%, rgba(249,115,22,0.5) 45%, rgba(236,72,153,0.5) 60%, rgba(139,92,246,0.5) 75%, transparent 100%',
+        'pink-purple': 'transparent 0%, rgba(236,72,153,0.5) 25%, rgba(139,92,246,0.6) 50%, rgba(236,72,153,0.5) 75%, transparent 100%'
+      };
+      var SPREAD = 40;
+      var PROXIMITY = 64;
+
+      function getGradientColors(variant) {
+        return GRADIENT[variant] || GRADIENT.default;
+      }
+
+      function updateGlow(clientX, clientY) {
+        var cards = document.querySelectorAll('.glow-card');
+        cards.forEach(function(card) {
+          var gradient = card.querySelector('.glow-gradient');
+          if (!gradient) return;
+          var rect = card.getBoundingClientRect();
+          var pad = PROXIMITY;
+          var inside = clientX >= rect.left - pad && clientX <= rect.right + pad &&
+                       clientY >= rect.top - pad && clientY <= rect.bottom + pad;
+          if (!inside) {
+            gradient.style.opacity = '0';
+            return;
+          }
+          var cx = rect.left + rect.width / 2;
+          var cy = rect.top + rect.height / 2;
+          var angle = Math.atan2(clientY - cy, clientX - cx);
+          var angleDeg = (angle * 180 / Math.PI) + 90;
+          var start = angleDeg - SPREAD / 2;
+          var variant = card.getAttribute('data-glow-variant') || 'default';
+          gradient.style.background = 'conic-gradient(from ' + start + 'deg, ' + getGradientColors(variant) + ')';
+          gradient.style.opacity = '1';
+        });
+      }
+
+      document.addEventListener('pointermove', function(e) {
+        updateGlow(e.clientX, e.clientY);
+      });
+
+      // FAQ Accordion - solo una pregunta abierta a la vez
+      document.querySelectorAll('.faq-trigger').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var item = this.closest('[data-faq-id]');
+          var targetId = item.getAttribute('data-faq-id');
+          var answerEl = document.getElementById('faq-answer-' + targetId);
+          var isOpen = answerEl.getAttribute('aria-hidden') === 'false';
+          // Cerrar todas
+          document.querySelectorAll('.faq-answer-wrap').forEach(function(el) {
+            el.setAttribute('aria-hidden', 'true');
+          });
+          document.querySelectorAll('.faq-trigger').forEach(function(tr) {
+            tr.setAttribute('aria-expanded', 'false');
+            var plus = tr.querySelector('.faq-icon-plus');
+            var minus = tr.querySelector('.faq-icon-minus');
+            if (plus) plus.classList.remove('hidden');
+            if (minus) minus.classList.add('hidden');
+          });
+          // Si estaba cerrada, abrir esta
+          if (!isOpen && answerEl) {
+            answerEl.setAttribute('aria-hidden', 'false');
+            this.setAttribute('aria-expanded', 'true');
+            var p = this.querySelector('.faq-icon-plus');
+            var m = this.querySelector('.faq-icon-minus');
+            if (p) p.classList.add('hidden');
+            if (m) m.classList.remove('hidden');
+          }
+        });
+      });
+
+      // Success Stories: acordeón exclusivo (solo una tarjeta abierta)
+      document.querySelectorAll('.success-view-results').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var targetId = this.getAttribute('data-results-id');
+          var targetResults = document.getElementById(targetId);
+          var targetChevron = this.querySelector('.chevron-icon');
+          if (!targetResults) return;
+          var isOpen = !targetResults.classList.contains('hidden');
+          // Cerrar todas primero
+          document.querySelectorAll('.success-results').forEach(function(el) {
+            el.classList.add('hidden');
+          });
+          document.querySelectorAll('.success-view-results .chevron-icon').forEach(function(c) {
+            c.classList.remove('rotate-180');
+          });
+          // Si estaba cerrada, abrir solo la actual
+          if (!isOpen) {
+            targetResults.classList.remove('hidden');
+            if (targetChevron) targetChevron.classList.add('rotate-180');
+          }
+        });
+      });
+    })();
+  </script>
+  <script>
+    (function() {
+      function parseValue(val) {
+        var m = val.match(/^([^\d]*)([\d,.]+)([^\d]*)$/);
+        if (!m) return { prefix: '', num: 0, suffix: val, format: function(n) { return String(n); } };
+        var prefix = m[1] || '', numStr = m[2] || '0', suffix = m[3] || '';
+        var num = parseInt(numStr.replace(/,/g, ''), 10) || 0;
+        var hasComma = numStr.indexOf(',') >= 0;
+        var format = function(n) {
+          var r = Math.round(n).toString();
+          return hasComma ? parseInt(r, 10).toLocaleString() : r;
+        };
+        return { prefix: prefix, num: num, suffix: suffix, format: format };
+      }
+      function animateCounter(el) {
+        var val = el.getAttribute('data-value');
+        var parsed = parseValue(val);
+        var duration = 1500;
+        var start = performance.now();
+        function tick(now) {
+          var elapsed = now - start;
+          var progress = Math.min(elapsed / duration, 1);
+          var eased = 1 - Math.pow(1 - progress, 2.5);
+          var current = parsed.num * eased;
+          el.textContent = parsed.prefix + parsed.format(current) + parsed.suffix;
+          if (progress < 1) requestAnimationFrame(tick);
+          else el.textContent = val;
+        }
+        requestAnimationFrame(tick);
+      }
+      var counters = document.querySelectorAll('.stat-counter');
+      var io = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (!entry.isIntersecting) return;
+          var el = entry.target;
+          if (el.dataset.animated) return;
+          el.dataset.animated = '1';
+          animateCounter(el);
+        });
+      }, { threshold: 0.2 });
+      counters.forEach(function(c) { io.observe(c); });
+    })();
+  </script>
+  <script>
+    (function() {
+      var stack = document.getElementById('global-movement-swiper');
+      if (!stack) return;
+      var isSwiping = false;
+      var startX = 0;
+      var currentX = 0;
+      var animId = null;
+      var duration = 300;
+
+      function getCards() {
+        return stack ? [].slice.call(stack.querySelectorAll('.image-card')) : [];
+      }
+      function getActive() { return stack.firstElementChild || null; }
+      function applySwipe(deltaX) {
+        var card = getActive();
+        if (!card) return;
+        card.style.setProperty('--swipe-x', deltaX + 'px');
+        card.style.setProperty('--swipe-rotate', (deltaX * 0.2) + 'deg');
+        card.style.opacity = (1 - Math.min(Math.abs(deltaX) / 100, 1) * 0.75).toString();
+      }
+      function updatePositions() {
+        var cards = getCards();
+        cards.forEach(function(c, i) {
+          c.style.setProperty('--i', (i + 1).toString());
+          c.style.setProperty('--swipe-x', '0px');
+          c.style.setProperty('--swipe-rotate', '0deg');
+          c.style.opacity = '1';
+          c.style.zIndex = (cards.length - i).toString();
+          c.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+        });
+      }
+      function handleEnd() {
+        if (!isSwiping) return;
+        if (animId) { cancelAnimationFrame(animId); animId = null; }
+        var deltaX = currentX - startX;
+        var card = getActive();
+        if (card) {
+          card.style.transition = 'transform ' + duration + 'ms ease, opacity ' + duration + 'ms ease';
+          if (Math.abs(deltaX) > 50) {
+            var dir = Math.sign(deltaX);
+            card.style.setProperty('--swipe-x', (dir * 300) + 'px');
+            card.style.setProperty('--swipe-rotate', (dir * 20) + 'deg');
+            setTimeout(function() {
+              stack.appendChild(card);
+              updatePositions();
+            }, duration);
+          } else {
+            applySwipe(0);
+          }
+        }
+        isSwiping = false;
+        startX = 0;
+        currentX = 0;
+      }
+
+      stack.addEventListener('pointerdown', function(e) {
+        if (isSwiping) return;
+        isSwiping = true;
+        startX = e.clientX;
+        currentX = e.clientX;
+        var c = getActive();
+        if (c) c.style.transition = 'none';
+      });
+      stack.addEventListener('pointermove', function(e) {
+        if (!isSwiping) return;
+        if (animId) cancelAnimationFrame(animId);
+        animId = requestAnimationFrame(function() {
+          currentX = e.clientX;
+          applySwipe(currentX - startX);
+          if (Math.abs(currentX - startX) > 50) handleEnd();
+        });
+      });
+      stack.addEventListener('pointerup', handleEnd);
+      stack.addEventListener('pointerleave', handleEnd);
+    })();
+  </script>
+  <script>
+    (function() {
+      var carousel = document.getElementById('podcast-carousel');
+      var track = document.getElementById('podcast-track');
+      var dotsWrap = document.querySelector('#podcast [role="tablist"]');
+      var prevBtn = document.getElementById('podcast-prev');
+      var nextBtn = document.getElementById('podcast-next');
+      if (!carousel || !track || !dotsWrap || !prevBtn || !nextBtn) return;
+
+      // Forzar eje horizontal: viewport oculto + inner-container en fila sin wrap
+      carousel.style.overflow = 'hidden';
+      carousel.style.width = '100%';
+      track.className = 'flex flex-row flex-nowrap transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]';
+
+      // Aplana páginas -> slides individuales para evitar stacking en md/sm
+      var pages = Array.prototype.slice.call(track.querySelectorAll('.podcast-page'));
+      var cards = [];
+      pages.forEach(function(page) {
+        Array.prototype.slice.call(page.querySelectorAll('.podcast-card')).forEach(function(card) {
+          cards.push(card);
+        });
+      });
+      track.innerHTML = '';
+      cards.forEach(function(card) {
+        var slide = document.createElement('div');
+        slide.className = 'podcast-slide flex-none basis-full md:basis-1/2 lg:basis-1/3 pl-0 pr-4 md:pr-6';
+        slide.appendChild(card);
+        track.appendChild(slide);
+      });
+
+      var currentGroup = 0;
+      var slidesPerView = 1;
+      var totalGroups = 1;
+
+      function getSlidesPerView() {
+        var w = window.innerWidth;
+        if (w >= 1024) return 3;
+        if (w >= 768) return 2;
+        return 1;
+      }
+
+      function renderDots() {
+        dotsWrap.innerHTML = '';
+        for (var i = 0; i < totalGroups; i++) {
+          var dot = document.createElement('button');
+          dot.type = 'button';
+          dot.setAttribute('data-dot', String(i));
+          dot.title = 'Página ' + (i + 1);
+          dot.className = 'rounded-full shrink-0 border-none transition-all duration-300 ease-in-out';
+          dot.addEventListener('click', (function(index) {
+            return function() {
+              currentGroup = index;
+              updateCarousel();
+            };
+          })(i));
+          dotsWrap.appendChild(dot);
+        }
+      }
+
+      function paintDots() {
+        var dots = dotsWrap.querySelectorAll('[data-dot]');
+        dots.forEach(function(dot, i) {
+          if (i === currentGroup) {
+            dot.style.backgroundColor = '#1330F4';
+            dot.style.width = '28px';
+            dot.style.height = '8px';
+            dot.style.opacity = '1';
+            dot.setAttribute('aria-current', 'true');
+          } else {
+            dot.style.backgroundColor = '#1330F4';
+            dot.style.width = '8px';
+            dot.style.height = '8px';
+            dot.style.opacity = '0.28';
+            dot.removeAttribute('aria-current');
+          }
+        });
+      }
+
+      function updateCarousel() {
+        track.style.transform = 'translateX(-' + (currentGroup * 100) + '%)';
+        paintDots();
+        prevBtn.disabled = currentGroup <= 0;
+        nextBtn.disabled = currentGroup >= totalGroups - 1;
+      }
+
+      function recalc() {
+        slidesPerView = getSlidesPerView();
+        totalGroups = Math.max(1, Math.ceil(cards.length / slidesPerView));
+        if (currentGroup > totalGroups - 1) currentGroup = totalGroups - 1;
+        renderDots();
+        updateCarousel();
+      }
+
+      prevBtn.addEventListener('click', function() {
+        if (currentGroup > 0) {
+          currentGroup--;
+          updateCarousel();
+        }
+      });
+      nextBtn.addEventListener('click', function() {
+        if (currentGroup < totalGroups - 1) {
+          currentGroup++;
+          updateCarousel();
+        }
+      });
+
+      window.addEventListener('resize', recalc);
+      recalc();
+    })();
+  </script>
+  <script>
+    (function() {
+      var nav = document.getElementById('navbar-header');
+      var threshold = 10;
+      function onScroll() {
+        if (window.scrollY > threshold) {
+          nav.classList.add('header-scrolled');
+        } else {
+          nav.classList.remove('header-scrolled');
+        }
+      }
+      window.addEventListener('scroll', onScroll);
+      onScroll();
+    })();
+  </script>
+  <!-- ===== MOBILE MENU JS ===== -->
+  <script>
+    (function() {
+      var panel    = document.getElementById('mobile-menu-panel');
+      var backdrop = document.getElementById('mobile-menu-backdrop');
+      var label    = document.getElementById('nav-trigger-label');
+      var top      = document.getElementById('morph-top');
+      var mid      = document.getElementById('morph-mid');
+      var bot      = document.getElementById('morph-bottom');
+      var isOpen   = false;
+
+      function applyMorphOpen() {
+        /* Línea superior → sube al centro y rota +45° */
+        top.style.top       = '17px';
+        top.style.transform = 'translateY(-50%) rotate(45deg)';
+        /* Línea central → desaparece */
+        mid.style.width   = '0px';
+        mid.style.opacity = '0';
+        /* Línea inferior → sube al centro y rota -45° */
+        bot.style.top       = '17px';
+        bot.style.transform = 'translateY(-50%) rotate(-45deg)';
+        /* Label: MENU → CLOSE in-place (cross-fade via opacity + color) */
+        label.style.opacity    = '0';
+        setTimeout(function() {
+          label.textContent      = 'Close';
+          label.style.color      = 'rgba(255,255,255,0.5)';
+          label.style.opacity    = '1';
+        }, 100);
+      }
+
+      function applyMorphClose() {
+        top.style.top       = '11px';
+        top.style.transform = 'translateY(0) rotate(0deg)';
+        mid.style.width   = '20px';
+        mid.style.opacity = '1';
+        bot.style.top       = '23px';
+        bot.style.transform = 'translateY(0) rotate(0deg)';
+        /* Label: CLOSE → MENU in-place */
+        label.style.opacity = '0';
+        setTimeout(function() {
+          label.textContent   = 'Menu';
+          label.style.color   = '#fff';
+          label.style.opacity = '1';
+        }, 100);
+      }
+
+      window.toggleMobileMenu = function() {
+        if (isOpen) { closeMobileMenu(); } else { openMobileMenu(); }
+      };
+
+      window.openMobileMenu = function() {
+        isOpen = true;
+        panel.classList.add('is-open');
+        backdrop.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+        applyMorphOpen();
+      };
+
+      window.closeMobileMenu = function() {
+        isOpen = false;
+        panel.classList.remove('is-open');
+        backdrop.classList.remove('is-open');
+        document.body.style.overflow = '';
+        applyMorphClose();
+      };
+
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && isOpen) window.closeMobileMenu();
+      });
+    })();
+  </script>
+
+  <script src="https://js.hsforms.net/forms/embed/v2.js"></script>
+  <script>
+    window.addEventListener('load', function() {
+      if (window.hbspt && window.hbspt.forms) {
+        window.hbspt.forms.create({
+          portalId: '22679661',
+          formId: 'd28de33f-fcd1-47f1-9f2d-48b349c3d548',
+          target: '#hubspot-contact-form',
+          submitText: "Let's talk >"
+        });
+      }
+    });
+  </script>
+</body>
+</html>
